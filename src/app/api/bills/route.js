@@ -82,7 +82,7 @@ export const POST = async (request) => {
         bill.otherFee = body.otherFee * bill.studentIds.length;
 
         bill.isExamFeeAdded = body.addExamFee;
-        bill.lastMonthDue = bill.totalDue;
+        bill.lastMonthDue = Number(bill.lastMonthDue) + Number(bill.totalDue);
         bill.totalDue =
           bill.totalEducationFee +
           bill.totalTransportFee +

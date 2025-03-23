@@ -97,10 +97,7 @@ export const POST = async (request) => {
         totalTransportFee: Number(studentData.transport),
         totalExamFee: Number(feeDetail.examFee),
         lastMonthDue: Number(studentData.dueFee),
-        totalDue:
-          Number(feeDetail.fee) +
-          Number(studentData.transport) +
-          Number(studentData.dueFee),
+        totalDue: 0,
       });
     } else {
       // Update existing bill
@@ -113,11 +110,6 @@ export const POST = async (request) => {
         Number(userBill.totalExamFee) + Number(feeDetail.examFee);
       userBill.lastMonthDue =
         (userBill.studentIds.length == 1 ? 0 : Number(userBill.lastMonthDue)) +
-        Number(studentData.dueFee);
-      userBill.totalDue =
-        (userBill.studentIds.length == 1 ? 0 : Number(userBill.totalDue)) +
-        Number(feeDetail.fee) +
-        Number(studentData.transport) +
         Number(studentData.dueFee);
     }
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 export async function middleware(request) {
   const path = await request.nextUrl.pathname;
-  const token = await request.cookies.get("token")?.value;
+  const token = (await request.cookies.get("token")?.value) || null;
 
   if (path === "/") {
     if (token == "npps6284@nauroo") {

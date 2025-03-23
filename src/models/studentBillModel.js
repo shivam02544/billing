@@ -84,7 +84,7 @@ const studentBillSchema = new Schema(
     },
     billGeneratedMonth: {
       type: String,
-      default: new Date().getMonth(),
+      default: new Date().getMonth() - 1,
     },
 
     totalDue: {
