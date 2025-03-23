@@ -14,7 +14,7 @@ const AboutPage = () => {
                 const res = await fetch("/api/fees");
                 const data = await res.json();
                 setFees(data.fees.length > 0 ? data.fees : [
-                    { className: "Pre-NC", fee: 0, examFee: 0 },
+                    { className: "PRE-NC", fee: 0, examFee: 0 },
                     { className: "NC", fee: 0, examFee: 0 },
                     { className: "LKG", fee: 0, examFee: 0 },
                     { className: "UKG", fee: 0, examFee: 0 },

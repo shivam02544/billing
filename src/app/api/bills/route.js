@@ -5,18 +5,36 @@ import { NextResponse } from "next/server";
 export const GET = async () => {
   try {
     await connectDb();
+
+    // Fetch all bills
     const bills = await StudentBillSchema.find();
-    const bill = await Promise.all(
-      bills.map(async (billDetail) => {
-        const studentDetail = await StudentSchema.findById(
-          billDetail.studentIds[0].studentId
-        );
+    if (!bills.length) {
+      return NextResponse.json({ status: 200, data: [] });
+    }
+
+    // Get all studentIds from bills
+    const studentIds = bills
+      .map((bill) => bill.studentIds?.[0]?.studentId)
+      .filter(Boolean); // Remove null/undefined
+
+    // Fetch all students in one query
+    const students = await StudentSchema.find({ _id: { $in: studentIds } });
+
+    // Create a map for quick lookups
+    const studentMap = new Map(students.map((s) => [s._id.toString(), s]));
+
+    // Process bills with student details
+    const billData = bills
+      .map((billDetail) => {
+        const student = studentMap.get(billDetail.studentIds?.[0]?.studentId);
+        if (!student) return null;
+
         return {
-          pageId: studentDetail.pageId,
-          name: studentDetail.name,
-          className: studentDetail.className,
-          parent: studentDetail.fatherName,
-          village: studentDetail.village,
+          pageId: student.pageId,
+          name: student.name,
+          className: student.className,
+          parent: student.fatherName,
+          village: student.village,
           tuitionFee: billDetail.totalEducationFee,
           transportFee: billDetail.totalTransportFee,
           examFee: billDetail.totalExamFee,
@@ -28,37 +46,26 @@ export const GET = async () => {
           lastMonthDue: billDetail.lastMonthDue,
         };
       })
-    );
-    bill.sort((a, b) => {
-      const classNameOrder = [
-        "PRE-NC",
-        "LKG",
-        "UKG",
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-      ];
-      return (
-        classNameOrder.indexOf(a.className) -
-        classNameOrder.indexOf(b.className)
-      );
-    });
+      .filter(Boolean); // Remove null values
 
-    return NextResponse.json({
-      status: 200,
-      data: bill,
-    });
+    // Define class sorting order
+    const classNameOrder = new Map(
+      ["PRE-NC", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8"].map(
+        (cls, index) => [cls, index]
+      )
+    );
+
+    // Sort bills by class
+    billData.sort(
+      (a, b) =>
+        (classNameOrder.get(a.className) ?? 99) -
+        (classNameOrder.get(b.className) ?? 99)
+    );
+
+    return NextResponse.json({ status: 200, data: billData });
   } catch (error) {
-    console.error("Error creating bill:", error);
-    return NextResponse.json({
-      status: 500,
-      message: "Failed to get bills",
-    });
+    console.error("Error fetching bills:", error);
+    return NextResponse.json({ status: 500, message: "Failed to get bills" });
   }
 };
 

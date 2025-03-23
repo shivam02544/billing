@@ -35,7 +35,7 @@ export const PUT = async (request) => {
   try {
     await connectDb();
     const body = await request.json();
-    const student = await StudentSchema.findById(Number(body.studentId));
+    const student = await StudentSchema.findById(body.studentId);
     if (!student) {
       return NextResponse.json({
         statusCode: 404,
@@ -44,6 +44,13 @@ export const PUT = async (request) => {
     }
     let newFee = await FeeSchema.findOne({ className: body.className });
     let oldFee = await FeeSchema.findOne({ className: student.className });
+
+    if (!newFee || !oldFee) {
+      return NextResponse.json({
+        statusCode: 404,
+        message: "Fee structure not found for the specified class",
+      });
+    }
     let diffFee = Number(oldFee.fee) - Number(newFee.fee);
     let diffExamFee = Number(oldFee.examFee) - Number(newFee.examFee);
     let transportDiff = Number(student.transport) - Number(body.transport);
