@@ -1,22 +1,26 @@
 import mongoose from "mongoose";
+
 const url = process.env.DB_URL;
+
 export const connectDb = async () => {
-  const connectionState = mongoose.connection.readyState;
-  if (connectionState == 1) {
-    console.log("already connected");
+  if (mongoose.connection.readyState === 1) {
+    console.log("Already connected to MongoDB");
     return;
   }
-  if (connectionState == 2) {
+  if (mongoose.connection.readyState === 2) {
     console.log("Connecting...");
     return;
   }
+
   try {
     await mongoose.connect(url, {
       dbName: "newnpps",
-      bufferCommands: false,
+      bufferCommands: true, // Enable buffering to avoid errors
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     });
-    console.log("connected");
-  } catch (e) {
-    console.log("Error: " + e);
+    console.log("MongoDB Connected");
+  } catch (error) {
+    console.error("MongoDB Connection Error:", error);
   }
 };
