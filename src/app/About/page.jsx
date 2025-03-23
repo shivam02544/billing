@@ -60,84 +60,87 @@ const AboutPage = () => {
 
         <>
             <ResponsiveMenu />
-            <div className="min-h-screen bg-orange-50 p-4">
-                <div className="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-                    <h2 className="text-2xl font-semibold text-center text-orange-600 mb-4">
-                        Class Fees Details
-                    </h2>
+            {
+                fees &&
+                <div className="min-h-screen bg-orange-50 p-4">
+                    <div className="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+                        <h2 className="text-2xl font-semibold text-center text-orange-600 mb-4">
+                            Class Fees Details
+                        </h2>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full border-collapse border border-orange-400">
-                            <thead>
-                                <tr className="bg-orange-100 text-orange-700">
-                                    <th className="border border-orange-400 px-4 py-2">Class</th>
-                                    <th className="border border-orange-400 px-4 py-2">Tuition Fee (₹)</th>
-                                    <th className="border border-orange-400 px-4 py-2">Exam Fee (₹)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {fees.map((fee, index) => (
-                                    <tr key={index} className="text-center">
-                                        <td className="border border-orange-400 px-4 py-2 font-medium">
-                                            {fee.className}
-                                        </td>
-                                        <td className="border border-orange-400 px-4 py-2">
-                                            {isEditing ? (
-                                                <input
-                                                    type="number"
-                                                    value={fee.fee}
-                                                    onChange={(e) => {
-                                                        const updatedFees = [...fees];
-                                                        updatedFees[index].fee = Number(e.target.value);
-                                                        setFees(updatedFees);
-                                                    }}
-                                                    className="border border-orange-400 rounded-md p-1 w-20 text-right"
-                                                />
-                                            ) : (
-                                                `₹${fee.fee}`
-                                            )}
-                                        </td>
-                                        <td className="border border-orange-400 px-4 py-2">
-                                            {isEditing ? (
-                                                <input
-                                                    type="number"
-                                                    value={fee.examFee}
-                                                    onChange={(e) => {
-                                                        const updatedFees = [...fees];
-                                                        updatedFees[index].examFee = Number(e.target.value);
-                                                        setFees(updatedFees);
-                                                    }}
-                                                    className="border border-orange-400 rounded-md p-1 w-20 text-right"
-                                                />
-                                            ) : (
-                                                `₹${fee.examFee}`
-                                            )}
-                                        </td>
+                        <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border border-orange-400">
+                                <thead>
+                                    <tr className="bg-orange-100 text-orange-700">
+                                        <th className="border border-orange-400 px-4 py-2">Class</th>
+                                        <th className="border border-orange-400 px-4 py-2">Tuition Fee (₹)</th>
+                                        <th className="border border-orange-400 px-4 py-2">Exam Fee (₹)</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    {fees.map((fee, index) => (
+                                        <tr key={index} className="text-center">
+                                            <td className="border border-orange-400 px-4 py-2 font-medium">
+                                                {fee.className}
+                                            </td>
+                                            <td className="border border-orange-400 px-4 py-2">
+                                                {isEditing ? (
+                                                    <input
+                                                        type="number"
+                                                        value={fee.fee}
+                                                        onChange={(e) => {
+                                                            const updatedFees = [...fees];
+                                                            updatedFees[index].fee = Number(e.target.value);
+                                                            setFees(updatedFees);
+                                                        }}
+                                                        className="border border-orange-400 rounded-md p-1 w-20 text-right"
+                                                    />
+                                                ) : (
+                                                    `₹${fee.fee}`
+                                                )}
+                                            </td>
+                                            <td className="border border-orange-400 px-4 py-2">
+                                                {isEditing ? (
+                                                    <input
+                                                        type="number"
+                                                        value={fee.examFee}
+                                                        onChange={(e) => {
+                                                            const updatedFees = [...fees];
+                                                            updatedFees[index].examFee = Number(e.target.value);
+                                                            setFees(updatedFees);
+                                                        }}
+                                                        className="border border-orange-400 rounded-md p-1 w-20 text-right"
+                                                    />
+                                                ) : (
+                                                    `₹${fee.examFee}`
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
 
-                    <div className="text-center mt-6">
-                        {isEditing ? (
-                            <button
-                                onClick={handleSaveClick}
-                                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
-                            >
-                                Save Changes
-                            </button>
-                        ) : (
-                            <button
-                                onClick={handleEditClick}
-                                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                            >
-                                Edit All Fees
-                            </button>
-                        )}
+                        <div className="text-center mt-6">
+                            {isEditing ? (
+                                <button
+                                    onClick={handleSaveClick}
+                                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+                                >
+                                    Save Changes
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handleEditClick}
+                                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                                >
+                                    Edit All Fees
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
-            </div>
+            }
         </>
     );
 };
