@@ -24,6 +24,7 @@ const PaymentHistory = ({ paymentHistory }) => {
                                 <th className="border border-orange-400 px-2 py-2">Total Education Fee (₹)</th>
                                 <th className="border border-orange-400 px-2 py-2">Transport Fee (₹)</th>
                                 <th className="border border-orange-400 px-2 py-2">Exam Fee (₹)</th>
+                                <th className="border border-orange-400 px-2 py-2">Extra Classes (₹)</th>
                                 <th className="border border-orange-400 px-2 py-2">Other Fee (₹)</th>
                                 <th className="border border-orange-400 px-2 py-2">Paid Amount (₹)</th>
                                 <th className="border border-orange-400 px-2 py-2">Payment Mode</th>
@@ -53,6 +54,9 @@ const PaymentHistory = ({ paymentHistory }) => {
                                                 {isSameMonthPayment ? '--' : `₹${record.totalExamFee}`}
                                             </td>
                                             <td className="border border-orange-400 px-2 py-2">
+                                                {isSameMonthPayment ? '--' : `₹${record.extraClassesFee || 0}`}
+                                            </td>
+                                            <td className="border border-orange-400 px-2 py-2">
                                                 {isSameMonthPayment ? '--' : `₹${record.otherFee}`}
                                             </td>
                                             <td className="border border-orange-400 px-2 py-2 font-bold">
@@ -67,7 +71,7 @@ const PaymentHistory = ({ paymentHistory }) => {
                                 })
                             ) : (
                                 <tr>
-                                    <td colSpan="8" className="text-center text-orange-700 py-4 font-semibold">
+                                    <td colSpan="10" className="text-center text-orange-700 py-4 font-semibold">
                                         No payment history found.
                                     </td>
                                 </tr>

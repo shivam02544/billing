@@ -54,6 +54,8 @@ export const PUT = async (request) => {
     let diffFee = Number(oldFee.fee) - Number(newFee.fee);
     let diffExamFee = Number(oldFee.examFee) - Number(newFee.examFee);
     let transportDiff = Number(student.transport) - Number(body.transport);
+    let extraClassesFeeDiff =
+      Number(student.extraClassesFee) - Number(body.extraClassesFee);
     // Update student's details
     student.className = body.className;
     student.name = body.name;
@@ -64,9 +66,10 @@ export const PUT = async (request) => {
     student.motherName = body.motherName;
     student.contact = body.contact;
     student.transport = Number(body.transport);
+    student.extraClassesFee = Number(body.extraClassesFee);
     await student.save();
 
-    // Update the class fee, transport fee, and due fee in the student bill if class is changed
+    // Update the class fee, transport fee, extra classes fee, and due fee in the student bill if class is changed
 
     const bill = await StudentBillSchema.findOne({ pageId: student.pageId });
     if (bill) {
@@ -74,6 +77,8 @@ export const PUT = async (request) => {
       bill.totalTransportFee =
         Number(bill.totalTransportFee) - Number(transportDiff);
       bill.totalExamFee = Number(bill.totalExamFee) - Number(diffExamFee);
+      bill.extraClassesFee =
+        Number(bill.extraClassesFee) - Number(extraClassesFeeDiff);
       await bill.save();
     }
 
@@ -122,6 +127,8 @@ export const DELETE = async (request) => {
       bill.totalTransportFee =
         Number(bill.totalTransportFee) - Number(student.transport);
       bill.totalExamFee = Number(bill.totalExamFee) - Number(feeDetail.examFee);
+      bill.extraClassesFee =
+        Number(bill.extraClassesFee) - Number(student.extraClassesFee);
       bill.studentIds = bill.studentIds.filter(
         (obj) => obj.studentId !== studentId.toString()
       );

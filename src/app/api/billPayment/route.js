@@ -33,6 +33,7 @@ export const GET = async (request) => {
           transportFee: studentData.transport ? studentData.transport : 0,
           examFee: bills.isExamFeeAdded ? studentFeeDetail.examFee : 0,
           otherFee: studentFeeDetail ? studentFeeDetail.otherFee : 0,
+          extraClassesFee: studentData.extraClassesFee || 0,
         };
       })
     );
@@ -76,6 +77,7 @@ export const POST = async (request) => {
       isExamFeeAdded: bill.isExamFeeAdded,
       totalDue: bill.totalDue,
       lastMonthDue: bill.lastMonthDue,
+      extraClassesFee: bill.extraClassesFee,
       paidAmount: Number(totalAmount),
       paymentMode: paymentMode,
     };

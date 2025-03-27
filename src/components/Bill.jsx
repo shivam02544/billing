@@ -78,11 +78,16 @@ const Bill = ({ pageId }) => {
                                 <th className="border border-orange-400 px-2 py-2">Tuition (₹)</th>
                                 <th className="border border-orange-400 px-2 py-2">Transport (₹)</th>
                                 <th className="border border-orange-400 px-2 py-2">Exam (₹)</th>
+                                <th className="border border-orange-400 px-2 py-2">Extra Classes (₹)</th>
                                 <th className="border border-orange-400 px-2 py-2">Total Due (₹)</th>
                             </tr>
                         </thead>
                         <tbody>
                             {students.map((student, index) => {
+                                const totalForStudent = Number(student.tuitionFee) +
+                                    Number(student.examFee) +
+                                    Number(student.transportFee) +
+                                    Number(student.extraClassesFee);
                                 return (
                                     <tr key={index} className="text-center text-xs md:text-sm">
                                         <td className="border border-orange-400 px-2 py-2 font-medium">{student.name}</td>
@@ -90,7 +95,8 @@ const Bill = ({ pageId }) => {
                                         <td className="border border-orange-400 px-2 py-2">₹{student.tuitionFee}</td>
                                         <td className="border border-orange-400 px-2 py-2">₹{student.transportFee}</td>
                                         <td className="border border-orange-400 px-2 py-2">₹{student.examFee}</td>
-                                        <td className="border border-orange-400 px-2 py-2 font-bold">₹{Number(student.tuitionFee) + Number(student.examFee) + Number(student.transportFee)}</td>
+                                        <td className="border border-orange-400 px-2 py-2">₹{student.extraClassesFee || 0}</td>
+                                        <td className="border border-orange-400 px-2 py-2 font-bold">₹{totalForStudent}</td>
                                     </tr>
                                 );
                             })}
@@ -98,23 +104,21 @@ const Bill = ({ pageId }) => {
                     </table>
                 </div>
 
-                {/* Paid Amount */}
-
+                {/* Fee Breakdown */}
                 <div className="text-right font-semibold text-orange-700 mt-4 text-sm md:text-base">
                     Last Month Due: ₹{studentBillDetail.lastMonthDue}
                 </div>
                 <div className="text-right font-semibold text-orange-700 mt-2 text-sm md:text-base">
                     {studentBillDetail.otherFeeMessage ? studentBillDetail.otherFeeMessage : "Other"}: ₹{studentBillDetail.otherFee}
                 </div>
+
                 <div className="text-right font-semibold text-orange-700 mt-2 text-sm md:text-base">
-                    Paid Amount: ₹
-                    {studentBillDetail.paidAmount}
+                    Paid Amount: ₹{studentBillDetail.paidAmount}
                 </div>
 
                 {/* Grand Total Calculation */}
                 <div className="text-right font-semibold text-orange-700 mt-2 text-sm md:text-base">
-                    Grand Total (After Payment): ₹
-                    {studentBillDetail.totalDue}
+                    Grand Total (After Payment): ₹{studentBillDetail.totalDue}
                 </div>
 
                 {/* Total Amount and Payment Mode Input */}

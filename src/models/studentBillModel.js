@@ -39,6 +39,10 @@ const billPaymentHistorySchema = new Schema({
     type: String,
     set: (value) => value.toUpperCase(),
   },
+  extraClassesFee: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const studentBillSchema = new Schema(
@@ -93,6 +97,10 @@ const studentBillSchema = new Schema(
     },
     lastMonthDue: {
       type: Number,
+    },
+    extraClassesFee: {
+      type: Number,
+      default: 0,
     },
     billPaidMonth: {
       type: String,

@@ -1,11 +1,11 @@
 "use client";
 import { formatDate } from "@/helper/converIntoDate";
-import { useRouter } from "next/navigation";
+
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const StudentDetailPage = ({ pageId, studentName }) => {
-    const router = useRouter()
+
     const [isEditing, setIsEditing] = useState(false);
     const [studentId, setStudentId] = useState("");
     const [sPageId, setPageId] = useState("");
@@ -18,6 +18,7 @@ const StudentDetailPage = ({ pageId, studentName }) => {
     const [motherName, setMotherName] = useState("");
     const [contact, setContact] = useState("");
     const [transport, setTransport] = useState("");
+    const [extraClassesFee, setExtraClassesFee] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -38,6 +39,7 @@ const StudentDetailPage = ({ pageId, studentName }) => {
                     setMotherName(studentData.motherName);
                     setContact(studentData.contact);
                     setTransport(studentData.transport);
+                    setExtraClassesFee(studentData.extraClassesFee);
                 }
             } catch (error) {
                 toast.error("Error fetching student data");
@@ -68,6 +70,7 @@ const StudentDetailPage = ({ pageId, studentName }) => {
                     motherName: motherName,
                     contact: contact,
                     transport: transport,
+                    extraClassesFee,
                 }),
             });
             const updateResponse = await response.json();
@@ -122,6 +125,7 @@ const StudentDetailPage = ({ pageId, studentName }) => {
                             { label: "Mother's Name", name: "motherName", type: "text", value: motherName, setter: setMotherName },
                             { label: "Contact", name: "contact", type: "text", value: contact, setter: setContact },
                             { label: "Transport fee", name: "transport", type: "number", value: transport, setter: setTransport },
+                            { label: "Extra Classes Fee", name: "extraClassesFee", type: "number", value: extraClassesFee, setter: setExtraClassesFee },
                         ].map((field, index) => (
                             <div key={index} className="flex flex-col">
                                 <label

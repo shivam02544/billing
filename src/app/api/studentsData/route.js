@@ -40,6 +40,7 @@ export const POST = async (request) => {
       contact,
       transport,
       dueFee,
+      extraClassesFee,
     } = await request.json();
 
     // Input validation
@@ -81,6 +82,7 @@ export const POST = async (request) => {
       contact,
       transport,
       dueFee,
+      extraClassesFee,
     });
 
     const studentData = await newStudent.save();
@@ -97,7 +99,8 @@ export const POST = async (request) => {
         totalTransportFee: Number(studentData.transport),
         totalExamFee: Number(feeDetail.examFee),
         lastMonthDue: Number(studentData.dueFee),
-        totalDue: 0,
+        extraClassesFee: Number(extraClassesFee),
+        totalDue: Number(studentData.dueFee),
       });
     } else {
       // Update existing bill
@@ -108,7 +111,12 @@ export const POST = async (request) => {
         Number(userBill.totalTransportFee) + Number(studentData.transport);
       userBill.totalExamFee =
         Number(userBill.totalExamFee) + Number(feeDetail.examFee);
+      userBill.extraClassesFee =
+        Number(userBill.extraClassesFee) + Number(extraClassesFee);
       userBill.lastMonthDue =
+        (userBill.studentIds.length == 1 ? 0 : Number(userBill.lastMonthDue)) +
+        Number(studentData.dueFee);
+      userBill.totalDue =
         (userBill.studentIds.length == 1 ? 0 : Number(userBill.lastMonthDue)) +
         Number(studentData.dueFee);
     }

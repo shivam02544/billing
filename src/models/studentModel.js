@@ -10,6 +10,7 @@ const studentSchema = new Schema({
   motherName: { type: String, set: (value) => value.toUpperCase() },
   contact: { type: String },
   transport: { type: Number },
+  extraClassesFee: { type: Number },
   dueFee: Number,
 });
 const StudentSchema =

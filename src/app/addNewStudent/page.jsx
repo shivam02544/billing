@@ -17,6 +17,8 @@ const Page = () => {
   const [dueFee, setDueFee] = useState("0");
   const [isLoading, setIsLoading] = useState(false);
   const [isSiblings, setIsSiblings] = useState(false)
+  const [extraClassesFee, setExtraClassesFee] = useState("0");
+
   const getUserDetail = async (pageId) => {
     try {
       const response = await fetch(`/api/studentsData?pageId=${pageId}`);
@@ -45,7 +47,7 @@ const Page = () => {
         setIsSiblings(false)
       }
     } catch (error) {
-      // toast.error('Failed to fetch student detail. Please try again.');
+      toast.error('Failed to fetch student detail. Please try again.');
     }
   }
 
@@ -63,7 +65,8 @@ const Page = () => {
       motherName,
       contact,
       transport,
-      dueFee
+      dueFee,
+      extraClassesFee
     };
     try {
       const response = await fetch('/api/studentsData', {
@@ -89,6 +92,7 @@ const Page = () => {
         setTransport("0");
         setDueFee("0");
         setIsSiblings(false)
+        setExtraClassesFee("0");
       } else {
         toast.error(data.message);
       }
@@ -122,7 +126,8 @@ const Page = () => {
               { label: "Father's Name", name: "fatherName", type: "text", value: fatherName, setter: setFatherName },
               { label: "Mother's Name", name: "motherName", type: "text", value: motherName, setter: setMotherName },
               { label: "Contact", name: "contact", type: "text", value: contact, setter: setContact },
-              { label: "Transport fee", name: "transport", type: "number", setter: setTransport },
+              { label: "Transport fee", name: "transport", type: "number", value: transport, setter: setTransport },
+              { label: "Extra Classes Fee", name: "extraClassesFee", type: "number", value: extraClassesFee, setter: setExtraClassesFee },
               ...(!isSiblings ? [{ label: "Due Fee", name: "dueFee", type: "number", value: dueFee, setter: setDueFee }] : []),
             ].map((field, index) => (
               <div key={index} className="flex flex-col">

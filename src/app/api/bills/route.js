@@ -35,12 +35,15 @@ export const GET = async () => {
           className: student.className,
           parent: student.fatherName,
           village: student.village,
-          tuitionFee: billDetail.totalEducationFee,
+          tuitionFee:
+            Number(billDetail.totalEducationFee) +
+            Number(billDetail.extraClassesFee),
           transportFee: billDetail.totalTransportFee,
           examFee: billDetail.totalExamFee,
           isExamFeeAdded: billDetail.isExamFeeAdded,
           otherFee: billDetail.otherFee,
           otherFeeMessage: billDetail.otherFeeMessage,
+          extraClassesFee: billDetail.extraClassesFee || 0,
           billGeneratedMonth: billDetail.billGeneratedMonth,
           totalDue: billDetail.totalDue,
           lastMonthDue: billDetail.lastMonthDue,
@@ -80,18 +83,20 @@ export const POST = async (request) => {
     for (const bill of bills) {
       if (bill.billGeneratedMonth != monthNumber) {
         bill.otherFee = body.otherFee * bill.studentIds.length;
-
         bill.isExamFeeAdded = body.addExamFee;
-        bill.lastMonthDue = Number(bill.lastMonthDue) + Number(bill.totalDue);
+        bill.lastMonthDue = Number(bill.totalDue);
+
         bill.totalDue =
-          bill.totalEducationFee +
-          bill.totalTransportFee +
-          bill.otherFee +
-          bill.lastMonthDue +
-          (bill.isExamFeeAdded ? bill.totalExamFee : 0);
+          Number(bill.totalEducationFee) +
+          Number(bill.totalTransportFee) +
+          Number(bill.otherFee) +
+          Number(bill.lastMonthDue) +
+          Number(bill.extraClassesFee) +
+          (bill.isExamFeeAdded ? Number(bill.totalExamFee) : 0);
 
         bill.billGeneratedMonth = monthNumber;
         bill.otherFeeMessage = body.otherFeeMessage;
+
         if (bill.paidAmount == 0) {
           let currentHistory = {
             totalEducationFee: bill.totalEducationFee,
@@ -99,6 +104,7 @@ export const POST = async (request) => {
             totalExamFee: bill.isExamFeeAdded ? bill.totalExamFee : 0,
             otherFee: bill.otherFee,
             otherFeeMessage: bill.otherFeeMessage,
+            extraClassesFee: bill.extraClassesFee,
             totalDue: bill.totalDue,
             lastMonthDue: bill.lastMonthDue,
             paidAmount: 0,
@@ -106,6 +112,7 @@ export const POST = async (request) => {
           };
           bill.billPaymentHistory.push(currentHistory);
         }
+
         bill.paidAmount = 0;
         await bill.save();
       }
