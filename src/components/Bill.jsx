@@ -95,7 +95,7 @@ const Bill = ({ pageId }) => {
                                         <td className="border border-orange-400 px-2 py-2">₹{student.tuitionFee}</td>
                                         <td className="border border-orange-400 px-2 py-2">₹{student.transportFee}</td>
                                         <td className="border border-orange-400 px-2 py-2">₹{student.examFee}</td>
-                                        <td className="border border-orange-400 px-2 py-2">₹{student.extraClassesFee || 0}</td>
+                                        <td className="border border-orange-400 px-2 py-2">₹{student.extraClassesFee}</td>
                                         <td className="border border-orange-400 px-2 py-2 font-bold">₹{totalForStudent}</td>
                                     </tr>
                                 );

@@ -58,59 +58,55 @@ export default function AllStudentBills() {
             </div>
 
             {/* Bills Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className='flex flex-wrap justify-center'>
                 {bills.map((bill, index) => (
-                    <div key={index} className="border-2 border-black p-4 text-xs w-full relative">
+                    <div key={index} className='no-page-break border-2 border-black w-[22rem] flex flex-col items-center m-1 p-2 relative' style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
                         {/* Month Display - Top Right */}
-                        <div className="absolute top-2 right-2 text-xs font-semibold text-gray-500">
+                        <div className='absolute top-2 right-2 text-xs font-semibold text-gray-500'>
                             On {months[bill.billGeneratedMonth]}
                         </div>
 
                         {/* PageId Display - Bottom Right */}
-                        <div className="absolute bottom-2 right-2 text-xs font-semibold text-gray-700">
+                        <div className='absolute bottom-2 right-2 text-xs font-semibold text-gray-700'>
                             {bill.pageId}
                         </div>
 
-                        {/* Header */}
-                        <div className="text-center font-bold text-lg border-b border-black pb-1 ">
-                            NEW PROGRESSIVE PUBLIC SCHOOL
-                            <div className="text-xs font-normal ">Nauroo, Jehanabad</div>
+                        <span className='text-sm'>Bill Payment Receipt</span>
+                        <div className='border-[1px] border-black text-sm w-full'>
+                            <div className='flex flex-col items-center '>
+                                <h1 className='font-bold text-lg px-1 text-center'>NEW PROGRESSIVE PUBLIC SCHOOL</h1>
+                                <span>Nauroo, Jehanabad</span>
+                            </div>
+                            <div className='px-3 flex justify-between'>
+                                <span>NAME: {bill.name}</span>
+                                <span>CLASS: {bill.className}</span>
+                            </div>
+                            <div className='px-3 flex justify-between'>
+                                <span>PARENT: {bill.parent}</span>
+                                <span>ADDRESS: {bill.village}</span>
+                            </div>
                         </div>
-
-                        {/* Student Details */}
-                        <div className="grid grid-cols-2 gap-2 border-b border-black py-1">
-                            <p><span className="font-semibold">NAME:</span> {bill.name}</p>
-                            <p><span className="font-semibold">CLASS:</span> {bill.className}</p>
-                            <p><span className="font-semibold">PARENT:</span> {bill.parent}</p>
-                            <p><span className="font-semibold">ADDRESS:</span> {bill.village}</p>
+                        <div className='flex flex-col w-[96%] my-1 text-xs'>
+                            {bill.tuitionFee != 0 ? <div className='flex justify-between'><span>SCHOOL FEE:</span><span>₹{bill.tuitionFee}</span></div> : <br />}
+                            {bill.transportFee != 0 ? <div className='flex justify-between'><span>TRANSPORT FEE:</span><span>₹{bill.transportFee}</span></div> : <br />}
+                            {bill.isExamFeeAdded && <div className='flex justify-between'><span>EXAM FEE:</span><span>₹{bill.examFee}</span></div>}
+                            {bill.lastMonthDue != 0 ? <div className='flex justify-between'><span>PREVIOUS DUES:</span><span>₹{bill.lastMonthDue}</span></div> : <br />}
+                            {bill.otherFee != 0 && <div className='flex justify-between'><span>{bill.otherFeeMessage == "" ? "OTHER FEE" : bill.otherFeeMessage}:</span><span>₹{bill.otherFee}</span></div>}
+                            <span>------------------------------------------------------------</span>
+                            <div className='flex justify-between font-bold'>
+                                <span>TOTAL DUES:</span>
+                                <span>₹{bill.totalDue}</span>
+                            </div>
                         </div>
-
-                        {/* Fee Breakdown */}
-                        <div className="py-1 border-b border-black">
-
-                            {bill.tuitionFee == 0 ? <br /> : <p className="flex justify-between"><span>Tuition Fee:</span> ₹{bill.tuitionFee}</p>}
-                            {bill.transportFee == 0 ? <br /> : <p className="flex justify-between"><span>Transport Fee:</span> ₹{bill.transportFee}</p>}
-                            {!bill.isExamFeeAdded ? <br /> : <p className="flex justify-between"><span>Exam Fee:</span> ₹{bill.examFee}</p>}
-                            {bill.lastMonthDue === 0 ? <br /> : <p className="flex justify-between"><span>Previous Dues:</span> ₹{bill.lastMonthDue}</p>}
-                            {bill.otherFee === 0 ? <br /> : <p className="flex justify-between"><span>{bill.otherFeeMessage}:</span> ₹{bill.otherFee}</p>}
-
-                        </div>
-
-                        {/* Total */}
-                        <div className="flex justify-between font-bold text-sm py-1">
-                            <span>TOTAL DUES:</span> <span>₹{bill.totalDue}</span>
-                        </div>
-
-                        {/* Payment Rules */}
-                        <div className="text-xs border-t border-black pt-1">
-                            <p>1. Fee Payment date is from 1st to 10th of every month.</p>
-                            <p>2. ₹50/- late fine if paid after due date.</p>
-                            <p>3. Admission may be canceled if not paid.</p>
+                        <div className='text-xs flex flex-col w-[96%] border-[1px] border-black mb-2 p-1'>
+                            <span>1. Fee Payment date is from 1st to 10th of every month.</span>
+                            <span>2. ₹50/- late fine if paid after due date.</span>
+                            <span>3. Admission may be canceled if not paid.</span>
                         </div>
                     </div>
-                )
-                )}
+                ))}
             </div>
+
         </div>
     );
 }
