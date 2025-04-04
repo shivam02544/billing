@@ -8,24 +8,48 @@ const Bill = ({ pageId }) => {
     const [studentBillDetail, setBill] = useState();
     const [totalAmount, setTotalAmount] = useState(0);
     const [paymentMode, setPaymentMode] = useState("CASH");
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-
         const fetchStudents = async () => {
             try {
+                setIsLoading(true);
                 const res = await fetch(`/api/billPayment?pageId=${pageId}`);
                 const data = await res.json();
                 setStudents(data.data);
-                setBill(data.bills)
-                console.log(data.bills);
-
+                setBill(data.bills);
             } catch (error) {
                 console.error("Error fetching students:", error);
+                toast.error("Failed to fetch bill details");
+            } finally {
+                setIsLoading(false);
             }
         };
 
         fetchStudents();
     }, []);
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-orange-50 flex justify-center items-center">
+                <div className="flex flex-col items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                    <span className="mt-2 text-orange-600">Loading bill details...</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (!studentBillDetail) {
+        return (
+            <div className="min-h-screen bg-orange-50 flex justify-center items-center">
+                <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <p className="text-red-600">No bill details found</p>
+                </div>
+            </div>
+        );
+    }
+
     const handlePayment = async (pageId) => {
         if (totalAmount != 0 && totalAmount != '') {
             const paymentData = {
