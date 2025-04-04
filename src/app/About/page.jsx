@@ -8,12 +8,28 @@ const AboutPage = () => {
 
     const [isEditing, setIsEditing] = useState(false);
 
+    // Define class order
+    const classOrder = {
+        "PRE-NC": 0,
+        "NC": 1,
+        "LKG": 2,
+        "UKG": 3,
+        "1": 4,
+        "2": 5,
+        "3": 6,
+        "4": 7,
+        "5": 8,
+        "6": 9,
+        "7": 10,
+        "8": 11
+    };
+
     useEffect(() => {
         const fetchFees = async () => {
             try {
                 const res = await fetch("/api/fees");
                 const data = await res.json();
-                setFees(data.fees.length > 0 ? data.fees : [
+                const defaultFees = [
                     { className: "PRE-NC", fee: 0, examFee: 0 },
                     { className: "NC", fee: 0, examFee: 0 },
                     { className: "LKG", fee: 0, examFee: 0 },
@@ -26,7 +42,13 @@ const AboutPage = () => {
                     { className: "6", fee: 0, examFee: 0 },
                     { className: "7", fee: 0, examFee: 0 },
                     { className: "8", fee: 0, examFee: 0 },
-                ]);
+                ];
+
+                // Sort fees based on classOrder
+                const sortedFees = (data.fees.length > 0 ? data.fees : defaultFees)
+                    .sort((a, b) => classOrder[a.className] - classOrder[b.className]);
+
+                setFees(sortedFees);
             } catch (error) {
                 console.error("Error fetching fees:", error);
             }
