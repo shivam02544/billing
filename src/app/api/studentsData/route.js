@@ -33,10 +33,9 @@ export const POST = async (request) => {
       name,
       className,
       village,
-      district,
-      dob,
+
       fatherName,
-      motherName,
+
       contact,
       transport,
       dueFee,
@@ -75,10 +74,9 @@ export const POST = async (request) => {
       name,
       className,
       village,
-      district,
-      dob,
+
       fatherName,
-      motherName,
+
       contact,
       transport,
       dueFee,

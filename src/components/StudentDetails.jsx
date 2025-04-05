@@ -1,5 +1,4 @@
 "use client";
-import { formatDate } from "@/helper/converIntoDate";
 
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -12,10 +11,9 @@ const StudentDetailPage = ({ pageId, studentName }) => {
     const [name, setName] = useState("");
     const [className, setClass] = useState("");
     const [village, setVillage] = useState("");
-    const [district, setDistrict] = useState("Jehanabad");
-    const [dob, setDob] = useState("");
+
     const [fatherName, setFatherName] = useState("");
-    const [motherName, setMotherName] = useState("");
+
     const [contact, setContact] = useState("");
     const [transport, setTransport] = useState("");
     const [extraClassesFee, setExtraClassesFee] = useState("");
@@ -33,10 +31,9 @@ const StudentDetailPage = ({ pageId, studentName }) => {
                     setName(studentData.name);
                     setClass(studentData.className)
                     setVillage(studentData.village);
-                    setDistrict(studentData.district);
-                    setDob(studentData.dob ? formatDate(studentData.dob) : "")
+
                     setFatherName(studentData.fatherName);
-                    setMotherName(studentData.motherName);
+
                     setContact(studentData.contact);
                     setTransport(studentData.transport);
                     setExtraClassesFee(studentData.extraClassesFee);
@@ -64,10 +61,9 @@ const StudentDetailPage = ({ pageId, studentName }) => {
                     name: name,
                     className: className,
                     village: village,
-                    district: district,
-                    dob: dob,
+
                     fatherName: fatherName,
-                    motherName: motherName,
+
                     contact: contact,
                     transport: transport,
                     extraClassesFee,
@@ -119,10 +115,10 @@ const StudentDetailPage = ({ pageId, studentName }) => {
                             { label: "Name", name: "name", type: "text", value: name, setter: setName },
                             { label: "Class", name: "className", type: "select", options: ["PRE-NC", "NC", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8"], value: className, setter: setClass },
                             { label: "Village", name: "village", type: "text", value: village, setter: setVillage },
-                            { label: "District", name: "district", type: "text", value: district, setter: setDistrict },
-                            { label: "Date of Birth", name: "dob", type: "date", value: dob, setter: setDob },
+
+
                             { label: "Father's Name", name: "fatherName", type: "text", value: fatherName, setter: setFatherName },
-                            { label: "Mother's Name", name: "motherName", type: "text", value: motherName, setter: setMotherName },
+
                             { label: "Contact", name: "contact", type: "text", value: contact, setter: setContact },
                             { label: "Transport fee", name: "transport", type: "number", value: transport, setter: setTransport },
                             { label: "Extra Classes Fee", name: "extraClassesFee", type: "number", value: extraClassesFee, setter: setExtraClassesFee },

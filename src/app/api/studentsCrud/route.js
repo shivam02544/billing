@@ -60,10 +60,9 @@ export const PUT = async (request) => {
     student.className = body.className;
     student.name = body.name;
     student.village = body.village;
-    student.district = body.district;
-    student.dob = body.dob;
+
     student.fatherName = body.fatherName;
-    student.motherName = body.motherName;
+
     student.contact = body.contact;
     student.transport = Number(body.transport);
     student.extraClassesFee = Number(body.extraClassesFee);

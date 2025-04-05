@@ -4,10 +4,9 @@ const studentSchema = new Schema({
   name: { type: String, set: (value) => value.toUpperCase() },
   className: { type: String, set: (value) => value.toUpperCase() },
   village: { type: String, set: (value) => value.toUpperCase() },
-  district: { type: String, set: (value) => value.toUpperCase() },
-  dob: Date,
+
   fatherName: { type: String, set: (value) => value.toUpperCase() },
-  motherName: { type: String, set: (value) => value.toUpperCase() },
+
   contact: { type: String },
   transport: { type: Number },
   extraClassesFee: { type: Number },

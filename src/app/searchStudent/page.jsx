@@ -115,7 +115,7 @@ const StudentSearch = () => {
                                                         <span className="hidden sm:inline"> | </span>
                                                         <span className="block sm:inline">Father: {student.fatherName}</span>
                                                         <span className="hidden sm:inline"> | </span>
-                                                        <span className="block sm:inline">Page ID: {student.pageId}</span>
+                                                        <span className="block text-orange-600 font-bold sm:inline">Page ID: {student.pageId}</span>
                                                     </p>
                                                 </div>
                                                 <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-start sm:justify-end">

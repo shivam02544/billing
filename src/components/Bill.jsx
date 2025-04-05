@@ -141,7 +141,7 @@ const Bill = ({ pageId }) => {
                 </div>
 
                 {/* Grand Total Calculation */}
-                <div className="text-right font-semibold text-orange-700 mt-2 text-sm md:text-base">
+                <div className="text-right font-semibold text-orange-900 mt-2 text-sm md:text-base">
                     Grand Total (After Payment): ₹{studentBillDetail.totalDue}
                 </div>
 
