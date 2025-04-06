@@ -23,6 +23,6 @@ export const config = {
     "/About",
     "/generateBill",
     "/studentBills",
-    "/api/*",
+    "/api/:path*",
   ],
 };
