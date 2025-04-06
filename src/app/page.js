@@ -12,7 +12,8 @@ export default function Home() {
       return;
     }
     if (username == "npps6284@nauroo") {
-      document.cookie = "token=" + username;
+      document.cookie =
+        "token=" + username + "; expires=Fri, 31 Dec 9999 23:59:59 GMT";
       toast.success("Logged in successfully!");
       router.push("/searchStudent");
     } else {

@@ -23,5 +23,6 @@ export const config = {
     "/About",
     "/generateBill",
     "/studentBills",
+    "/api/*",
   ],
 };

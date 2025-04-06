@@ -13,6 +13,7 @@ const SimpleMenu = () => {
         toast.success("Logout successfully...")
 
 
+
         window.location.reload();
 
 
