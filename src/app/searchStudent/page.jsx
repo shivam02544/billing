@@ -41,11 +41,13 @@ const StudentSearch = () => {
                 const name = (student.name || '').toLowerCase();
                 const className = (student.className || '').toLowerCase();
                 const fatherName = (student.fatherName || '').toLowerCase();
+                const village = (student.village || '').toLowerCase();
 
                 return pageId.includes(value) ||
                     name.includes(value) ||
                     className.includes(value) ||
-                    fatherName.includes(value);
+                    fatherName.includes(value) ||
+                    village.includes(value);
             })
         );
     };
@@ -89,7 +91,7 @@ const StudentSearch = () => {
 
                             <input
                                 type="text"
-                                placeholder="Search by Page ID, Name, Class, or Father's Name..."
+                                placeholder="Search by Page ID, Name, Class, Father's Name, or Village..."
                                 value={searchQuery}
                                 onChange={handleSearch}
                                 className="w-full border border-orange-400 rounded-md p-2 mb-4 focus:ring-orange-500 focus:border-orange-500"
@@ -114,6 +116,8 @@ const StudentSearch = () => {
                                                         <span className="block sm:inline">Class: {student.className}</span>
                                                         <span className="hidden sm:inline"> | </span>
                                                         <span className="block sm:inline">Father: {student.fatherName}</span>
+                                                        <span className="hidden sm:inline"> | </span>
+                                                        <span className="block sm:inline">Village: {student.village}</span>
                                                         <span className="hidden sm:inline"> | </span>
                                                         <span className="block text-orange-600 font-bold sm:inline">Page ID: {student.pageId}</span>
                                                     </p>
