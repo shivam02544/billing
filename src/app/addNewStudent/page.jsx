@@ -16,7 +16,7 @@ const Page = () => {
   const [dueFee, setDueFee] = useState("0");
   const [isLoading, setIsLoading] = useState(false);
   const [isSiblings, setIsSiblings] = useState(false)
-  const [extraClassesFee, setExtraClassesFee] = useState("0");
+  const [extraClassesFee, setExtraClassesFee] = useState("");
 
   const getUserDetail = async (pageId) => {
     try {
@@ -40,8 +40,8 @@ const Page = () => {
         setFatherName("");
 
         setContact("");
-        setTransport("0");
-        setDueFee("0");
+        setTransport("");
+        setDueFee("");
         setIsSiblings(false)
       }
     } catch (error) {
@@ -86,10 +86,10 @@ const Page = () => {
         setFatherName("");
 
         setContact("");
-        setTransport("0");
-        setDueFee("0");
+        setTransport("");
+        setDueFee("");
         setIsSiblings(false)
-        setExtraClassesFee("0");
+        setExtraClassesFee("");
       } else {
         toast.error(data.message);
       }
