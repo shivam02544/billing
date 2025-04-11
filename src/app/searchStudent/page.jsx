@@ -56,9 +56,9 @@ const StudentSearch = () => {
     return (
         showBill ?
             <>
-                <div className="text-center bg-orange-50 ">
+                <div className="z-10 top-0 sticky text-center bg-orange-50 ">
                     <button
-                        className="z-10 top-0 sticky px-3  py-1 m-4 cursor-pointer bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                        className=" px-3  py-1 m-4 cursor-pointer bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
                         onClick={() => setShowBill(false)}
                     >
                         Back to Search
@@ -69,9 +69,9 @@ const StudentSearch = () => {
             :
             showStudentDetail ?
                 <>
-                    <div className="text-center bg-orange-50 ">
+                    <div className="z-10 top-0 sticky text-center bg-orange-50 ">
                         <button
-                            className="z-10 top-0 sticky px-3  py-1 m-4 cursor-pointer bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                            className=" px-3  py-1 m-4 cursor-pointer bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
                             onClick={() => setShowDetail(false)}
                         >
                             Back to Search
