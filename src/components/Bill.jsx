@@ -6,7 +6,7 @@ import PaymentHistory from "./PaymentHistoryPage";
 const Bill = ({ pageId }) => {
     const [students, setStudents] = useState([]);
     const [studentBillDetail, setBill] = useState();
-    const [totalAmount, setTotalAmount] = useState(0);
+    const [totalAmount, setTotalAmount] = useState();
     const [paymentMode, setPaymentMode] = useState("CASH");
     const [isLoading, setIsLoading] = useState(true);
 
