@@ -47,6 +47,7 @@ export const GET = async () => {
           billGeneratedMonth: billDetail.billGeneratedMonth,
           totalDue: billDetail.totalDue,
           lastMonthDue: billDetail.lastMonthDue,
+          paidAmount: billDetail.paidAmount || 0,
         };
       })
       .filter(Boolean); // Remove null values
