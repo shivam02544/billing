@@ -60,7 +60,7 @@ export default function AllStudentBills() {
             {/* Bills Grid */}
             <div className='flex flex-wrap justify-center'>
                 {bills.map((bill, index) => (
-                    <div key={index} className='no-page-break border-2 border-black w-[22rem] flex flex-col items-center m-1 p-2 relative' style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
+                    <div key={index} className='no-page-break border-2 border-black w-[22rem] flex flex-col items-center m-3 p-2 relative' style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
                         {/* Month Display - Top Right */}
                         <div className='absolute top-2 right-2 text-xs font-semibold text-gray-500'>
                             On {months[bill.billGeneratedMonth]}
