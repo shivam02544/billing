@@ -41,7 +41,7 @@ const Page = () => {
 
         setContact("");
         setTransport("");
-        setDueFee("");
+        setDueFee("0");
         setIsSiblings(false)
       }
     } catch (error) {

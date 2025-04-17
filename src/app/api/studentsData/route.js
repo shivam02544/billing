@@ -9,6 +9,7 @@ export const GET = async (request) => {
     const { searchParams } = new URL(request.url);
     const pageId = searchParams.get("pageId");
     const students = await StudentSchema.find({ pageId });
+    const studentBill = await StudentBillSchema.findOne({ pageId });
     if (students.length === 0) {
       return NextResponse.json({
         status: 404,
@@ -18,6 +19,7 @@ export const GET = async (request) => {
     return NextResponse.json({
       status: 200,
       data: students,
+      studentBill,
     });
   } catch (error) {
     console.error("Error fetching students:", error);
@@ -112,11 +114,13 @@ export const POST = async (request) => {
       userBill.extraClassesFee =
         Number(userBill.extraClassesFee) + Number(extraClassesFee);
       userBill.lastMonthDue =
-        (userBill.studentIds.length == 1 ? 0 : Number(userBill.lastMonthDue)) +
-        Number(studentData.dueFee);
+        (userBill.studentIds.length == 1
+          ? Number(studentData.dueFee)
+          : Number(userBill.lastMonthDue)) + Number(studentData.dueFee);
       userBill.totalDue =
-        (userBill.studentIds.length == 1 ? 0 : Number(userBill.lastMonthDue)) +
-        Number(studentData.dueFee);
+        (userBill.studentIds.length == 1
+          ? Number(studentData.dueFee)
+          : Number(userBill.totalDue)) + Number(studentData.dueFee);
     }
 
     // Single save operation
