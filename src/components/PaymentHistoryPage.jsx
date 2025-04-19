@@ -5,8 +5,6 @@ import { formatDate } from "@/helper/converIntoDate";
 
 const PaymentHistory = ({ paymentHistory }) => {
 
-
-
     return (
         <div className="min-h-screen bg-orange-50 p-4">
             <div className="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-lg">
@@ -42,22 +40,22 @@ const PaymentHistory = ({ paymentHistory }) => {
                                         <tr key={index} className="text-center text-xs md:text-sm">
                                             <td className="border border-orange-400 px-2 py-2">{formatDate(record.date)}</td>
                                             <td className="border border-orange-400 px-2 py-2">
-                                                {isSameMonthPayment ? '--' : `₹${record.lastMonthDue}`}
+                                                {`₹${record.lastMonthDue}`}
                                             </td>
                                             <td className="border border-orange-400 px-2 py-2">
-                                                {isSameMonthPayment ? '--' : `₹${record.totalEducationFee}`}
+                                                {`₹${record.totalEducationFee}`}
                                             </td>
                                             <td className="border border-orange-400 px-2 py-2">
-                                                {isSameMonthPayment ? '--' : `₹${record.totalTransportFee}`}
+                                                {`₹${record.totalTransportFee}`}
                                             </td>
                                             <td className="border border-orange-400 px-2 py-2">
-                                                {isSameMonthPayment ? '--' : `₹${record.totalExamFee}`}
+                                                {`₹${record.totalExamFee}`}
                                             </td>
                                             <td className="border border-orange-400 px-2 py-2">
-                                                {isSameMonthPayment ? '--' : `₹${record.extraClassesFee || 0}`}
+                                                {`₹${record.extraClassesFee || 0}`}
                                             </td>
                                             <td className="border border-orange-400 px-2 py-2">
-                                                {isSameMonthPayment ? '--' : `₹${record.otherFee}`}
+                                                {`₹${record.otherFee}`}
                                             </td>
                                             <td className="border border-orange-400 px-2 py-2 font-bold">
                                                 {`₹${record.paidAmount}`}

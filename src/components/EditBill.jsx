@@ -8,6 +8,7 @@ const EditBill = ({ pageId }) => {
     const [isEditing, setIsEditing] = useState(false)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    const [isExamFeeAdded, setIsExamFeeAdded] = useState(false)
 
     const [totalEducationFee, setTotalEducationFee] = useState(0)
     const [totalTransportFee, setTotalTransportFee] = useState(0)
@@ -43,6 +44,7 @@ const EditBill = ({ pageId }) => {
                 setTotalDue(data.studentBill.totalDue || 0)
                 setLastMonthDue(data.studentBill.lastMonthDue || 0)
                 setExtraClassesFee(data.studentBill.extraClassesFee || 0)
+                setIsExamFeeAdded(data.studentBill.isExamFeeAdded || false)
 
             } catch (error) {
                 console.error('Failed to fetch bill data:', error)
@@ -61,17 +63,23 @@ const EditBill = ({ pageId }) => {
     const handleSave = async () => {
         try {
             setLoading(true)
-            await axios.put(`/api/student-bill/${pageId}`, {
-                totalEducationFee: Number(totalEducationFee),
-                totalTransportFee: Number(totalTransportFee),
-                totalExamFee: Number(totalExamFee),
-                otherFee: Number(otherFee),
-                otherFeeMessage,
-                paidAmount: Number(paidAmount),
-                totalDue: Number(totalDue),
-                lastMonthDue: Number(lastMonthDue),
-                extraClassesFee: Number(extraClassesFee),
+            const response = await fetch(`/api/editBill`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    pageId,
+                    otherFee: Number(otherFee),
+                    otherFeeMessage,
+                    paidAmount: Number(paidAmount),
+                    totalDue: Number(totalDue),
+                    lastMonthDue: Number(lastMonthDue),
+                }),
             })
+            if (!response.ok) {
+                toast.error('Failed to update bill')
+            }
             setIsEditing(false)
             toast.success("Bill updated successfully")
             router.refresh()
@@ -83,7 +91,17 @@ const EditBill = ({ pageId }) => {
         }
     }
 
-
+    const handleCalculateBill = async () => {
+        setTotalDue(
+            Number(totalEducationFee) +
+            Number(totalTransportFee) +
+            Number(otherFee) +
+            Number(lastMonthDue) +
+            Number(extraClassesFee) +
+            (isExamFeeAdded ? Number(totalExamFee) : 0) -
+            Number(paidAmount)
+        )
+    }
 
     if (loading && !isEditing) {
         return (
@@ -121,15 +139,15 @@ const EditBill = ({ pageId }) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
-                        { label: 'Total Education Fee', name: 'totalEducationFee', value: totalEducationFee, setter: setTotalEducationFee },
-                        { label: 'Total Transport Fee', name: 'totalTransportFee', value: totalTransportFee, setter: setTotalTransportFee },
-                        { label: 'Total Exam Fee', name: 'totalExamFee', value: totalExamFee, setter: setTotalExamFee },
-                        { label: 'Other Fee', name: 'otherFee', value: otherFee, setter: setOtherFee },
+                        { label: 'Total Education Fee', name: 'totalEducationFee', value: totalEducationFee, setter: setTotalEducationFee, disabled: true },
+                        { label: 'Total Transport Fee', name: 'totalTransportFee', value: totalTransportFee, setter: setTotalTransportFee, disabled: true },
+                        { label: 'Total Exam Fee', name: 'totalExamFee', value: totalExamFee, setter: setTotalExamFee, disabled: true },
+                        { label: 'Other Fee', name: 'otherFee', value: otherFee, setter: setOtherFee, calculate: handleCalculateBill },
                         { label: 'Other Fee Message', name: 'otherFeeMessage', value: otherFeeMessage, setter: setOtherFeeMessage, type: 'text' },
-                        { label: 'Paid Amount', name: 'paidAmount', value: paidAmount, setter: setPaidAmount },
-                        { label: 'Total Due', name: 'totalDue', value: totalDue, setter: setTotalDue },
-                        { label: 'Last Month Due', name: 'lastMonthDue', value: lastMonthDue, setter: setLastMonthDue },
-                        { label: 'Extra Classes Fee', name: 'extraClassesFee', value: extraClassesFee, setter: setExtraClassesFee },
+                        { label: 'Paid Amount', name: 'paidAmount', value: paidAmount, setter: setPaidAmount, calculate: handleCalculateBill },
+                        { label: 'Total Due', name: 'totalDue', value: totalDue, setter: setTotalDue, disabled: true },
+                        { label: 'Last Month Due', name: 'lastMonthDue', value: lastMonthDue, setter: setLastMonthDue, calculate: handleCalculateBill },
+                        { label: 'Extra Classes Fee', name: 'extraClassesFee', value: extraClassesFee, setter: setExtraClassesFee, disabled: true },
                     ].map((field, i) => (
                         <div key={i} className="flex flex-col">
                             <label htmlFor={field.name} className="text-sm font-medium text-gray-700 mb-1">
@@ -140,8 +158,11 @@ const EditBill = ({ pageId }) => {
                                 id={field.name}
                                 name={field.name}
                                 value={field.value}
-                                onChange={(e) => field.setter(field.type === 'text' ? e.target.value : Number(e.target.value))}
-                                disabled={!isEditing || loading}
+                                onChange={(e) => {
+                                    field.setter(field.type === 'text' ? e.target.value : Number(e.target.value))
+                                    handleCalculateBill()
+                                }}
+                                disabled={!isEditing || loading || field.disabled}
                                 className="border border-orange-400 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                             />
                         </div>
@@ -159,7 +180,6 @@ const EditBill = ({ pageId }) => {
                     >
                         {loading ? 'Saving...' : isEditing ? 'Save' : 'Edit'}
                     </button>
-
                 </div>
             </div>
         </div>

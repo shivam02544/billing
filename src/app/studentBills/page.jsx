@@ -91,9 +91,9 @@ export default function AllStudentBills() {
                             {bill.transportFee != 0 ? <div className='flex justify-between'><span>TRANSPORT FEE:</span><span>₹{bill.transportFee}</span></div> : <br />}
                             {bill.isExamFeeAdded && <div className='flex justify-between'><span>EXAM FEE:</span><span>₹{bill.examFee}</span></div>}
                             {bill.lastMonthDue != 0 ? <div className='flex justify-between'><span>PREVIOUS DUES:</span><span>₹{bill.lastMonthDue}</span></div> : <br />}
-                            {bill.otherFee != 0 && <div className='flex justify-between'><span>{bill.otherFeeMessage == "" ? "OTHER FEE" : bill.otherFeeMessage}:</span><span>₹{bill.otherFee}</span></div>}
+                            {bill.otherFee != 0 ? <div className='flex justify-between'><span>{bill.otherFeeMessage == "" ? "OTHER FEE" : bill.otherFeeMessage}:</span><span>₹{bill.otherFee}</span></div> : <br />}
                             {bill.paidAmount != 0 && <div className='flex justify-between'><span>PAID AMOUNT:</span><span>₹{bill.paidAmount}</span></div>}
-                            <span>------------------------------------------------------------</span>
+                            <span>----------------------------------------------------------------</span>
                             <div className='flex justify-between font-bold'>
                                 <span>TOTAL DUES:</span>
                                 <span>₹{bill.totalDue}</span>
