@@ -2,6 +2,7 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import ResponsiveMenu from "@/components/ResponsiveMenu";
+import Link from "next/link";
 
 
 const GenerateBill = () => {
@@ -105,6 +106,7 @@ const GenerateBill = () => {
                         >
                             Print Bill
                         </button>
+                        <Link href={"/getStudentsBill"} className="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition text-sm md:text-base">Get new bill</Link>
                     </div>
                 </div>
             </div>

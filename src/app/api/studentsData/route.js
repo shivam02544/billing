@@ -42,12 +42,14 @@ export const POST = async (request) => {
       transport,
       dueFee,
       extraClassesFee,
+      isYearllyFee,
     } = await request.json();
 
     // Input validation
     if (!pageId || !name || !className) {
       return NextResponse.json({
         status: 400,
+
         message: "Required fields are missing",
       });
     }
@@ -86,7 +88,12 @@ export const POST = async (request) => {
     });
 
     const studentData = await newStudent.save();
-
+    if (isYearllyFee) {
+      return NextResponse.json({
+        status: 201,
+        message: "Student added successfully",
+      });
+    }
     // Handle bill creation/update
     let userBill = await StudentBillSchema.findOne({ pageId });
 
