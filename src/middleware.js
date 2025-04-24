@@ -3,6 +3,10 @@ export async function middleware(request) {
   const path = await request.nextUrl.pathname;
   const token = (await request.cookies.get("token")?.value) || null;
 
+  if (path === "/api/studentsCrud") {
+    return NextResponse.next();
+  }
+
   if (path === "/") {
     if (token == "npps6284@nauroo") {
       return NextResponse.redirect(new URL(`/searchStudent`, request.url));

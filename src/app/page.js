@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -38,6 +39,14 @@ export default function Home() {
           >
             Login
           </button>
+        </div>
+        <div className="py-2 px-4 md:py-0 hover:bg-orange-700 md:hover:bg-transparent mt-4">
+          <Link
+            className="block text-center md:inline cursor-pointer"
+            href="/studentList"
+          >
+            Search Students
+          </Link>
         </div>
       </div>
     </>
