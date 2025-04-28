@@ -6,16 +6,20 @@ import toast from "react-hot-toast";
 
 export default function PayBillPage() {
     const [pageId, setPageId] = useState("");
-    const [showBill, setShowBill] = useState(false)
+    const [showBill, setShowBill] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         if (pageId.trim() === "") {
-            toast.error("Fill the page Id to get the bill")
+            toast.error("Please fill the page Id to get the bill");
             return;
-
         }
-        setShowBill(true)
+
+        // Reset showBill first, then show again
+        setShowBill(false);
+        setTimeout(() => {
+            setShowBill(true);
+        }, 10);
     };
 
     return (
@@ -40,12 +44,9 @@ export default function PayBillPage() {
                         Show
                     </button>
                 </form>
-                {
-                    showBill &&
-                    <Bill pageId={pageId} />
-                }
+
+                {showBill && <Bill pageId={pageId} />}
             </div>
         </>
-
     );
 }
