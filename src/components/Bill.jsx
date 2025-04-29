@@ -55,6 +55,7 @@ const Bill = ({ pageId }) => {
     }
 
     const handlePayment = async (pageId) => {
+        await fetch(`/api/calculateTotalFees`)
         if (totalAmount != 0 && totalAmount != '') {
             const paymentData = {
                 pageId,
@@ -87,6 +88,7 @@ const Bill = ({ pageId }) => {
 
     const handleRegenerateBill = async () => {
         try {
+            await fetch(`/api/calculateTotalFees`)
             const response = await fetch(`/api/editBill`, {
                 method: 'POST',
                 headers: {

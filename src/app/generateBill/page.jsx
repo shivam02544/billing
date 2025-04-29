@@ -4,7 +4,6 @@ import toast from "react-hot-toast";
 import ResponsiveMenu from "@/components/ResponsiveMenu";
 import Link from "next/link";
 
-
 const GenerateBill = () => {
     const [addExamFee, setAddExamFee] = useState(false);
     const [otherFee, setOtherFee] = useState(0);
@@ -24,6 +23,7 @@ const GenerateBill = () => {
     const handleGenerateBill = async () => {
         try {
             setLoading(true);
+
             const response = await fetch('/api/bills', {
                 method: 'POST',
                 headers: {
@@ -41,6 +41,8 @@ const GenerateBill = () => {
             }
 
             const data = await response.json();
+            await fetch(`/api/calculateTotalFees`)
+            toast.success(data.message)
 
         } catch (error) {
             console.error('Error generating bill:', error);

@@ -44,8 +44,11 @@ export default function PayBillPage() {
                         Show
                     </button>
                 </form>
+                <div className=" w-full ">
+                    {showBill && <Bill pageId={pageId} />}
+                </div>
 
-                {showBill && <Bill pageId={pageId} />}
+
             </div>
         </>
     );
