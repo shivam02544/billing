@@ -13,6 +13,7 @@ const Bill = ({ pageId }) => {
     const [paymentMode, setPaymentMode] = useState("CASH");
     const [isLoading, setIsLoading] = useState(true);
     const [showEditBill, setShowBill] = useState(false)
+    const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
 
     useEffect(() => {
         const fetchStudents = async () => {
@@ -55,34 +56,41 @@ const Bill = ({ pageId }) => {
     }
 
     const handlePayment = async (pageId) => {
-        await fetch(`/api/calculateTotalFees`)
-        if (totalAmount != 0 && totalAmount != '') {
-            const paymentData = {
-                pageId,
-                totalAmount,
-                paymentMode,
-            };
+        setIsPaymentProcessing(true);
+        try {
+            await fetch(`/api/calculateTotalFees`)
+            if (totalAmount != 0 && totalAmount != '') {
+                const paymentData = {
+                    pageId,
+                    totalAmount,
+                    paymentMode,
+                };
 
-            const response = await fetch(`/api/billPayment`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(paymentData),
-            });
+                const response = await fetch(`/api/billPayment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(paymentData),
+                });
 
-            const data = await response.json();
+                const data = await response.json();
 
-            if (data.status === 200) {
-                toast.success("Payment recorded successfully");
-                setTotalAmount(0);
-                setBill(data.bill)
+                if (data.status === 200) {
+                    toast.success("Payment recorded successfully");
+                    setTotalAmount(0);
+                    setBill(data.bill)
+                } else {
+                    toast.error(data.message);
+                }
             } else {
-                toast.error(data.message);
+                toast.error("Fill the amount to pay first...")
+                return
             }
-        } else {
-            toast.error("Fill the amount to pay first...")
-            return
+        } catch (error) {
+            toast.error("Failed to process payment");
+        } finally {
+            setIsPaymentProcessing(false);
         }
     }
 
@@ -211,11 +219,18 @@ const Bill = ({ pageId }) => {
                     {/* Payment Button */}
                     <div className="text-center mt-6 space-x-2">
                         <button
-                            className="cursor-pointer bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition text-sm md:text-base"
+                            className={`cursor-pointer bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition text-sm md:text-base flex items-center justify-center ${isPaymentProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                             onClick={() => handlePayment(pageId)}
-
+                            disabled={isPaymentProcessing}
                         >
-                            Proceed to Payment
+                            {isPaymentProcessing ? (
+                                <div className="flex items-center">
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                    Processing...
+                                </div>
+                            ) : (
+                                'Proceed to Payment'
+                            )}
                         </button>
                     </div>
                 </div>
