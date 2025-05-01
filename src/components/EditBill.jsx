@@ -139,13 +139,13 @@ const EditBill = ({ pageId }) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
-                        { label: 'Total Education Fee', name: 'totalEducationFee', value: totalEducationFee, setter: setTotalEducationFee, disabled: true },
-                        { label: 'Total Transport Fee', name: 'totalTransportFee', value: totalTransportFee, setter: setTotalTransportFee, disabled: true },
+                        { label: 'Total Education Fee', name: 'totalEducationFee', value: totalEducationFee, setter: setTotalEducationFee, disabled: false },
+                        { label: 'Total Transport Fee', name: 'totalTransportFee', value: totalTransportFee, setter: setTotalTransportFee, disabled: false },
                         { label: 'Total Exam Fee', name: 'totalExamFee', value: totalExamFee, setter: setTotalExamFee, disabled: true },
                         { label: 'Other Fee', name: 'otherFee', value: otherFee, setter: setOtherFee, calculate: handleCalculateBill },
                         { label: 'Other Fee Message', name: 'otherFeeMessage', value: otherFeeMessage, setter: setOtherFeeMessage, type: 'text' },
                         { label: 'Paid Amount', name: 'paidAmount', value: paidAmount, setter: setPaidAmount, calculate: handleCalculateBill },
-                        { label: 'Total Due', name: 'totalDue', value: totalDue, setter: setTotalDue, disabled: true },
+                        { label: 'Total Due', name: 'totalDue', value: totalDue, setter: setTotalDue, disabled: false },
                         { label: 'Last Month Due', name: 'lastMonthDue', value: lastMonthDue, setter: setLastMonthDue, calculate: handleCalculateBill },
                         { label: 'Extra Classes Fee', name: 'extraClassesFee', value: extraClassesFee, setter: setExtraClassesFee, disabled: true },
                     ].map((field, i) => (

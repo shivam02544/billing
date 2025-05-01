@@ -42,7 +42,6 @@ export const GET = async () => {
       totalStudentFee += edu + trans + exam + other + extra;
     });
 
-    // Format current month like "April 2025"
     const currentMonth = months[bills[0].billGeneratedMonth];
     const currentYear = new Date().getFullYear();
     const formattedMonth = `${currentMonth} ${currentYear}`;
