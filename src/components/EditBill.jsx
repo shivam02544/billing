@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 
 const EditBill = ({ pageId }) => {
+
     const router = useRouter()
     const [isEditing, setIsEditing] = useState(false)
     const [loading, setLoading] = useState(true)
@@ -19,6 +20,10 @@ const EditBill = ({ pageId }) => {
     const [totalDue, setTotalDue] = useState(0)
     const [lastMonthDue, setLastMonthDue] = useState(0)
     const [extraClassesFee, setExtraClassesFee] = useState(0)
+    useEffect(() => {
+        handleCalculateBill()
+    }, [totalEducationFee, totalTransportFee, otherFee, lastMonthDue, extraClassesFee, totalExamFee, paidAmount, isExamFeeAdded])
+
 
     useEffect(() => {
         if (!pageId) return
@@ -159,8 +164,8 @@ const EditBill = ({ pageId }) => {
                                 name={field.name}
                                 value={field.value}
                                 onChange={(e) => {
-                                    field.setter(field.type === 'text' ? e.target.value : Number(e.target.value))
-                                    handleCalculateBill()
+                                    const value = field.type === 'text' ? e.target.value : Number(e.target.value || 0)
+                                    field.setter(value)
                                 }}
                                 disabled={!isEditing || loading || field.disabled}
                                 className="border border-orange-400 rounded-md p-2 focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
