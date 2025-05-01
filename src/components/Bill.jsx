@@ -217,7 +217,7 @@ const Bill = ({ pageId }) => {
                     </div>
 
                     {/* Payment Button */}
-                    <div className="text-center mt-6 space-x-2">
+                    <div className="text-center mt-6 space-x-2 flex items-center justify-center">
                         <button
                             className={`cursor-pointer bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition text-sm md:text-base flex items-center justify-center ${isPaymentProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                             onClick={() => handlePayment(pageId)}
