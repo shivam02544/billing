@@ -77,37 +77,45 @@ export const POST = async (request) => {
   try {
     await connectDb();
     const body = await request.json();
+    
+    // Validate required fields
+    if (body.otherFee === undefined || body.addExamFee === undefined || body.otherFeeMessage === undefined) {
+      return NextResponse.json({
+        status: 400,
+        message: "Missing required fields: otherFee, addExamFee, or otherFeeMessage",
+      });
+    }
+    
     const bills = await StudentBillSchema.find();
-
     const monthNumber = new Date().getMonth();
 
     for (const bill of bills) {
-      if (bill.billGeneratedMonth != monthNumber) {
-        bill.otherFee = body.otherFee * bill.studentIds.length;
-        bill.isExamFeeAdded = body.addExamFee;
-        bill.lastMonthDue = Number(bill.totalDue);
+      if (bill.billGeneratedMonth !== monthNumber) {
+        bill.otherFee = Number(body.otherFee || 0) * (bill.studentIds?.length || 0);
+        bill.isExamFeeAdded = Boolean(body.addExamFee);
+        bill.lastMonthDue = Number(bill.totalDue || 0);
 
         bill.totalDue =
-          Number(bill.totalEducationFee) +
-          Number(bill.totalTransportFee) +
-          Number(bill.otherFee) +
-          Number(bill.lastMonthDue) +
-          Number(bill.extraClassesFee) +
-          (bill.isExamFeeAdded ? Number(bill.totalExamFee) : 0);
+          Number(bill.totalEducationFee || 0) +
+          Number(bill.totalTransportFee || 0) +
+          Number(bill.otherFee || 0) +
+          Number(bill.lastMonthDue || 0) +
+          Number(bill.extraClassesFee || 0) +
+          (bill.isExamFeeAdded ? Number(bill.totalExamFee || 0) : 0);
 
         bill.billGeneratedMonth = monthNumber;
-        bill.otherFeeMessage = body.otherFeeMessage;
+        bill.otherFeeMessage = String(body.otherFeeMessage || "");
 
-        if (bill.paidAmount == 0) {
+        if (Number(bill.paidAmount || 0) === 0) {
           let currentHistory = {
-            totalEducationFee: bill.totalEducationFee,
-            totalTransportFee: bill.totalTransportFee,
-            totalExamFee: bill.isExamFeeAdded ? bill.totalExamFee : 0,
-            otherFee: bill.otherFee,
-            otherFeeMessage: bill.otherFeeMessage,
-            extraClassesFee: bill.extraClassesFee,
-            totalDue: bill.totalDue,
-            lastMonthDue: bill.lastMonthDue,
+            totalEducationFee: Number(bill.totalEducationFee || 0),
+            totalTransportFee: Number(bill.totalTransportFee || 0),
+            totalExamFee: bill.isExamFeeAdded ? Number(bill.totalExamFee || 0) : 0,
+            otherFee: Number(bill.otherFee || 0),
+            otherFeeMessage: String(bill.otherFeeMessage || ""),
+            extraClassesFee: Number(bill.extraClassesFee || 0),
+            totalDue: Number(bill.totalDue || 0),
+            lastMonthDue: Number(bill.lastMonthDue || 0),
             paidAmount: 0,
             paymentMode: "--",
           };

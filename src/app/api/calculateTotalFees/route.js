@@ -1,7 +1,6 @@
 import { connectDb } from "@/helper/connectDB";
 import SchoolFeeCartSchema from "@/models/schoolFeeCart";
 import StudentBillSchema from "@/models/studentBillModel";
-
 import { NextResponse } from "next/server";
 
 export const GET = async () => {
@@ -33,16 +32,24 @@ export const GET = async () => {
     let totalPaidFee = 0;
 
     bills.forEach((bill) => {
-      const edu = bill.totalEducationFee || 0;
-      const trans = bill.totalTransportFee || 0;
-      const exam = bill.isExamFeeAdded ? bill.totalExamFee || 0 : 0;
-      const other = bill.otherFee || 0;
-      const extra = bill.extraClassesFee || 0;
-      totalPaidFee += bill.paidAmount || 0;
+      const edu = Number(bill.totalEducationFee || 0);
+      const trans = Number(bill.totalTransportFee || 0);
+      const exam = bill.isExamFeeAdded ? Number(bill.totalExamFee || 0) : 0;
+      const other = Number(bill.otherFee || 0);
+      const extra = Number(bill.extraClassesFee || 0);
+      totalPaidFee += Number(bill.paidAmount || 0);
       totalStudentFee += edu + trans + exam + other + extra;
     });
 
-    const currentMonth = months[bills[0].billGeneratedMonth];
+    // Validate bill data before accessing
+    if (!bills[0] || bills[0].billGeneratedMonth === undefined) {
+      return NextResponse.json({
+        status: 400,
+        message: "Invalid bill data found",
+      });
+    }
+
+    const currentMonth = months[Number(bills[0].billGeneratedMonth) || 0];
     const currentYear = new Date().getFullYear();
     const formattedMonth = `${currentMonth} ${currentYear}`;
 

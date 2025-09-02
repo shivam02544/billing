@@ -3,9 +3,10 @@ import FeeSchema from "@/models/feeModel";
 import StudentBillSchema from "@/models/studentBillModel";
 import StudentSchema from "@/models/studentModel";
 import { NextResponse } from "next/server";
+
 export const GET = async (request) => {
-  await connectDb();
   try {
+    await connectDb();
     const { searchParams } = new URL(request.url);
     const pageId = searchParams.get("pageId");
     const students = await StudentSchema.find({ pageId });
@@ -28,16 +29,14 @@ export const GET = async (request) => {
 };
 
 export const POST = async (request) => {
-  await connectDb();
   try {
+    await connectDb();
     const {
       pageId,
       name,
       className,
       village,
-
       fatherName,
-
       contact,
       transport,
       dueFee,
@@ -49,10 +48,10 @@ export const POST = async (request) => {
     if (!pageId || !name || !className) {
       return NextResponse.json({
         status: 400,
-
         message: "Required fields are missing",
       });
     }
+    
     // Check for existing student
     const student = await StudentSchema.findOne({ pageId, name });
     if (student) {
@@ -78,13 +77,11 @@ export const POST = async (request) => {
       name,
       className,
       village,
-
       fatherName,
-
       contact,
-      transport,
-      dueFee,
-      extraClassesFee,
+      transport: Number(transport || 0),
+      dueFee: Number(dueFee || 0),
+      extraClassesFee: Number(extraClassesFee || 0),
     });
 
     const studentData = await newStudent.save();
@@ -94,6 +91,7 @@ export const POST = async (request) => {
         message: "Student added successfully",
       });
     }
+    
     // Handle bill creation/update
     let userBill = await StudentBillSchema.findOne({ pageId });
 
@@ -102,32 +100,32 @@ export const POST = async (request) => {
       userBill = new StudentBillSchema({
         pageId: studentData.pageId,
         studentIds: [{ studentId: studentData._id }],
-        totalEducationFee: Number(feeDetail.fee),
-        totalTransportFee: Number(studentData.transport),
-        totalExamFee: Number(feeDetail.examFee),
-        lastMonthDue: Number(studentData.dueFee),
-        extraClassesFee: Number(extraClassesFee),
-        totalDue: Number(studentData.dueFee),
+        totalEducationFee: Number(feeDetail.fee || 0),
+        totalTransportFee: Number(studentData.transport || 0),
+        totalExamFee: Number(feeDetail.examFee || 0),
+        lastMonthDue: Number(studentData.dueFee || 0),
+        extraClassesFee: Number(extraClassesFee || 0),
+        totalDue: Number(studentData.dueFee || 0),
       });
     } else {
       // Update existing bill
       userBill.studentIds.push({ studentId: studentData._id });
       userBill.totalEducationFee =
-        Number(userBill.totalEducationFee) + Number(feeDetail.fee);
+        Number(userBill.totalEducationFee || 0) + Number(feeDetail.fee || 0);
       userBill.totalTransportFee =
-        Number(userBill.totalTransportFee) + Number(studentData.transport);
+        Number(userBill.totalTransportFee || 0) + Number(studentData.transport || 0);
       userBill.totalExamFee =
-        Number(userBill.totalExamFee) + Number(feeDetail.examFee);
+        Number(userBill.totalExamFee || 0) + Number(feeDetail.examFee || 0);
       userBill.extraClassesFee =
-        Number(userBill.extraClassesFee) + Number(extraClassesFee);
+        Number(userBill.extraClassesFee || 0) + Number(extraClassesFee || 0);
       userBill.lastMonthDue =
-        (userBill.studentIds.length == 1
-          ? Number(studentData.dueFee)
-          : Number(userBill.lastMonthDue)) + Number(studentData.dueFee);
+        (userBill.studentIds.length === 1
+          ? Number(studentData.dueFee || 0)
+          : Number(userBill.lastMonthDue || 0)) + Number(studentData.dueFee || 0);
       userBill.totalDue =
-        (userBill.studentIds.length == 1
-          ? Number(studentData.dueFee)
-          : Number(userBill.totalDue)) + Number(studentData.dueFee);
+        (userBill.studentIds.length === 1
+          ? Number(studentData.dueFee || 0)
+          : Number(userBill.totalDue || 0)) + Number(studentData.dueFee || 0);
     }
 
     // Single save operation

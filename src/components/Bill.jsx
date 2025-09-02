@@ -9,7 +9,7 @@ const Bill = ({ pageId }) => {
     const router = useRouter()
     const [students, setStudents] = useState([]);
     const [studentBillDetail, setBill] = useState();
-    const [totalAmount, setTotalAmount] = useState();
+    const [totalAmount, setTotalAmount] = useState(0);
     const [paymentMode, setPaymentMode] = useState("CASH");
     const [isLoading, setIsLoading] = useState(true);
     const [showEditBill, setShowBill] = useState(false)
@@ -20,9 +20,16 @@ const Bill = ({ pageId }) => {
             try {
                 setIsLoading(true);
                 const res = await fetch(`/api/billPayment?pageId=${pageId}`);
+                if (!res.ok) {
+                    throw new Error('Failed to fetch bill details');
+                }
                 const data = await res.json();
-                setStudents(data.data);
-                setBill(data.bills);
+                if (data.status === 200) {
+                    setStudents(data.data || []);
+                    setBill(data.bills);
+                } else {
+                    toast.error(data.message || "Failed to fetch bill details");
+                }
             } catch (error) {
                 console.error("Error fetching students:", error);
                 toast.error("Failed to fetch bill details");
@@ -31,8 +38,10 @@ const Bill = ({ pageId }) => {
             }
         };
 
-        fetchStudents();
-    }, []);
+        if (pageId) {
+            fetchStudents();
+        }
+    }, [pageId]);
 
     if (isLoading) {
         return (
@@ -56,38 +65,39 @@ const Bill = ({ pageId }) => {
     }
 
     const handlePayment = async (pageId) => {
+        if (!totalAmount || totalAmount <= 0) {
+            toast.error("Please enter a valid amount to pay");
+            return;
+        }
+
         setIsPaymentProcessing(true);
         try {
             await fetch(`/api/calculateTotalFees`)
-            if (totalAmount != 0 && totalAmount != '') {
-                const paymentData = {
-                    pageId,
-                    totalAmount,
-                    paymentMode,
-                };
+            const paymentData = {
+                pageId,
+                totalAmount: Number(totalAmount),
+                paymentMode,
+            };
 
-                const response = await fetch(`/api/billPayment`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(paymentData),
-                });
+            const response = await fetch(`/api/billPayment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(paymentData),
+            });
 
-                const data = await response.json();
+            const data = await response.json();
 
-                if (data.status === 200) {
-                    toast.success("Payment recorded successfully");
-                    setTotalAmount(0);
-                    setBill(data.bill)
-                } else {
-                    toast.error(data.message);
-                }
+            if (data.status === 200) {
+                toast.success("Payment recorded successfully");
+                setTotalAmount(0);
+                setBill(data.bill)
             } else {
-                toast.error("Fill the amount to pay first...")
-                return
+                toast.error(data.message || "Failed to process payment");
             }
         } catch (error) {
+            console.error("Payment error:", error);
             toast.error("Failed to process payment");
         } finally {
             setIsPaymentProcessing(false);
@@ -121,13 +131,12 @@ const Bill = ({ pageId }) => {
 
     return showEditBill ?
         <>
-
             <EditBill pageId={pageId} />
         </> :
         studentBillDetail && (
             <div className="min-h-screen bg-orange-50 p-4 relative">
                 <div className="absolute top-2 right-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-md shadow-md text-xs md:text-sm">
-                    {students.length > 0 && studentBillDetail.billGeneratedMonth == new Date().getMonth() ? "Current Month Bill Generated" : "Bill not generated"}
+                    {students.length > 0 && Number(studentBillDetail.billGeneratedMonth) === new Date().getMonth() ? "Current Month Bill Generated" : "Bill not generated"}
                 </div>
                 <div className="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-lg">
                     <h2 className="text-xl md:text-2xl font-semibold text-center text-orange-600 mb-4">
@@ -154,18 +163,18 @@ const Bill = ({ pageId }) => {
                             </thead>
                             <tbody>
                                 {students.map((student, index) => {
-                                    const totalForStudent = Number(student.tuitionFee) +
-                                        Number(student.examFee) +
-                                        Number(student.transportFee) +
-                                        Number(student.extraClassesFee);
+                                    const totalForStudent = Number(student.tuitionFee || 0) +
+                                        Number(student.examFee || 0) +
+                                        Number(student.transportFee || 0) +
+                                        Number(student.extraClassesFee || 0);
                                     return (
                                         <tr key={index} className="text-center text-xs md:text-sm">
                                             <td className="border border-orange-400 px-2 py-2 font-medium">{student.name}</td>
                                             <td className="border border-orange-400 px-2 py-2">{student.className}</td>
-                                            <td className="border border-orange-400 px-2 py-2">₹{student.tuitionFee}</td>
-                                            <td className="border border-orange-400 px-2 py-2">₹{student.transportFee}</td>
-                                            <td className="border border-orange-400 px-2 py-2">₹{student.examFee}</td>
-                                            <td className="border border-orange-400 px-2 py-2">₹{student.extraClassesFee}</td>
+                                            <td className="border border-orange-400 px-2 py-2">₹{Number(student.tuitionFee || 0)}</td>
+                                            <td className="border border-orange-400 px-2 py-2">₹{Number(student.transportFee || 0)}</td>
+                                            <td className="border border-orange-400 px-2 py-2">₹{Number(student.examFee || 0)}</td>
+                                            <td className="border border-orange-400 px-2 py-2">₹{Number(student.extraClassesFee || 0)}</td>
                                             <td className="border border-orange-400 px-2 py-2 font-bold">₹{totalForStudent}</td>
                                         </tr>
                                     );
@@ -176,19 +185,19 @@ const Bill = ({ pageId }) => {
 
                     {/* Fee Breakdown */}
                     <div className="text-right font-semibold text-orange-700 mt-4 text-sm md:text-base">
-                        Last Month Due: ₹{studentBillDetail.lastMonthDue}
+                        Last Month Due: ₹{Number(studentBillDetail.lastMonthDue || 0)}
                     </div>
                     <div className="text-right font-semibold text-orange-700 mt-2 text-sm md:text-base">
-                        {studentBillDetail.otherFeeMessage ? studentBillDetail.otherFeeMessage : "Other"}: ₹{studentBillDetail.otherFee}
+                        {studentBillDetail.otherFeeMessage ? studentBillDetail.otherFeeMessage : "Other"}: ₹{Number(studentBillDetail.otherFee || 0)}
                     </div>
 
                     <div className="text-right font-semibold text-orange-700 mt-2 text-sm md:text-base">
-                        Paid Amount: ₹{studentBillDetail.paidAmount}
+                        Paid Amount: ₹{Number(studentBillDetail.paidAmount || 0)}
                     </div>
 
                     {/* Grand Total Calculation */}
                     <div className="text-right font-semibold text-orange-900 mt-2 text-sm md:text-base">
-                        Grand Total (After Payment): ₹{studentBillDetail.totalDue}
+                        Grand Total (After Payment): ₹{Number(studentBillDetail.totalDue || 0)}
                     </div>
 
                     {/* Total Amount and Payment Mode Input */}
@@ -196,11 +205,14 @@ const Bill = ({ pageId }) => {
                         <label className="block text-sm font-medium text-orange-700">Total Amount</label>
                         <input
                             type="number"
+                            min="0"
+                            step="0.01"
                             className="border border-orange-400 rounded-md p-2 w-full"
                             placeholder="Enter total amount"
                             value={totalAmount}
                             onChange={(e) => {
-                                setTotalAmount(e.target.value)
+                                const value = e.target.value;
+                                setTotalAmount(value === '' ? 0 : Number(value));
                             }}
                         />
 
@@ -234,7 +246,7 @@ const Bill = ({ pageId }) => {
                         </button>
                     </div>
                 </div>
-                <PaymentHistory paymentHistory={studentBillDetail.billPaymentHistory} />
+                <PaymentHistory paymentHistory={studentBillDetail.billPaymentHistory || []} />
             </div>
         );
 };

@@ -120,14 +120,11 @@ export const DELETE = async (request) => {
     const feeDetail = await FeeSchema.findOne({ className: student.className });
     const bill = await StudentBillSchema.findOne({ pageId: student.pageId });
 
-    if (bill) {
-      bill.totalEducationFee =
-        Number(bill.totalEducationFee) - Number(feeDetail.fee);
-      bill.totalTransportFee =
-        Number(bill.totalTransportFee) - Number(student.transport);
-      bill.totalExamFee = Number(bill.totalExamFee) - Number(feeDetail.examFee);
-      bill.extraClassesFee =
-        Number(bill.extraClassesFee) - Number(student.extraClassesFee);
+    if (bill && feeDetail) {
+      bill.totalEducationFee = Number(bill.totalEducationFee || 0) - Number(feeDetail.fee || 0);
+      bill.totalTransportFee = Number(bill.totalTransportFee || 0) - Number(student.transport || 0);
+      bill.totalExamFee = Number(bill.totalExamFee || 0) - Number(feeDetail.examFee || 0);
+      bill.extraClassesFee = Number(bill.extraClassesFee || 0) - Number(student.extraClassesFee || 0);
       bill.studentIds = bill.studentIds.filter(
         (obj) => obj.studentId !== studentId.toString()
       );

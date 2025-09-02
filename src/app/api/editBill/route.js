@@ -2,6 +2,7 @@ import { connectDb } from "@/helper/connectDB";
 import StudentBillSchema from "@/models/studentBillModel";
 import StudentSchema from "@/models/studentModel";
 import { NextResponse } from "next/server";
+
 export const GET = async (request) => {
   try {
     await connectDb();
@@ -14,6 +15,15 @@ export const GET = async (request) => {
     if (!bill) {
       return NextResponse.json({ status: 404, message: "Bill not found" });
     }
+    
+    // Validate studentIds array
+    if (!bill.studentIds || !Array.isArray(bill.studentIds) || bill.studentIds.length === 0) {
+      return NextResponse.json({
+        status: 404,
+        message: "No students found in this bill",
+      });
+    }
+    
     const studentData = await StudentSchema.findById(
       bill.studentIds[0].studentId
     );
@@ -29,17 +39,17 @@ export const GET = async (request) => {
       className: studentData.className,
       parent: studentData.fatherName,
       village: studentData.village,
-      tuitionFee: Number(bill.totalEducationFee) + Number(bill.extraClassesFee),
-      transportFee: bill.totalTransportFee,
-      examFee: bill.totalExamFee,
-      isExamFeeAdded: bill.isExamFeeAdded,
-      otherFee: bill.otherFee,
-      otherFeeMessage: bill.otherFeeMessage,
-      extraClassesFee: bill.extraClassesFee || 0,
-      billGeneratedMonth: bill.billGeneratedMonth,
-      totalDue: bill.totalDue,
-      lastMonthDue: bill.lastMonthDue,
-      paidAmount: bill.paidAmount || 0,
+      tuitionFee: Number(bill.totalEducationFee || 0) + Number(bill.extraClassesFee || 0),
+      transportFee: Number(bill.totalTransportFee || 0),
+      examFee: Number(bill.totalExamFee || 0),
+      isExamFeeAdded: Boolean(bill.isExamFeeAdded),
+      otherFee: Number(bill.otherFee || 0),
+      otherFeeMessage: bill.otherFeeMessage || "",
+      extraClassesFee: Number(bill.extraClassesFee || 0),
+      billGeneratedMonth: Number(bill.billGeneratedMonth || 0),
+      totalDue: Number(bill.totalDue || 0),
+      lastMonthDue: Number(bill.lastMonthDue || 0),
+      paidAmount: Number(bill.paidAmount || 0),
     };
     return NextResponse.json({ status: 200, studentDataObject });
   } catch (error) {
@@ -53,25 +63,30 @@ export const POST = async (request) => {
     await connectDb();
     const body = await request.json();
     const bill = await StudentBillSchema.findOne({ pageId: body.pageId });
+    
+    if (!bill) {
+      return NextResponse.json({ status: 404, message: "Bill not found" });
+    }
+    
     const monthNumber = new Date().getMonth();
-    if (bill.billGeneratedMonth == monthNumber) {
+    if (bill.billGeneratedMonth === monthNumber) {
       bill.totalDue =
-        Number(bill.totalEducationFee) +
-        Number(bill.totalTransportFee) +
-        Number(bill.otherFee) +
-        Number(bill.lastMonthDue) +
-        Number(bill.extraClassesFee) +
-        (bill.isExamFeeAdded ? Number(bill.totalExamFee) : 0) -
-        Number(bill.paidAmount);
+        Number(bill.totalEducationFee || 0) +
+        Number(bill.totalTransportFee || 0) +
+        Number(bill.otherFee || 0) +
+        Number(bill.lastMonthDue || 0) +
+        Number(bill.extraClassesFee || 0) +
+        (bill.isExamFeeAdded ? Number(bill.totalExamFee || 0) : 0) -
+        Number(bill.paidAmount || 0);
       let currentHistory = {
-        totalEducationFee: bill.totalEducationFee,
-        totalTransportFee: bill.totalTransportFee,
-        totalExamFee: bill.isExamFeeAdded ? bill.totalExamFee : 0,
-        otherFee: bill.otherFee,
-        otherFeeMessage: bill.otherFeeMessage,
-        extraClassesFee: bill.extraClassesFee,
-        totalDue: bill.totalDue,
-        lastMonthDue: bill.lastMonthDue,
+        totalEducationFee: Number(bill.totalEducationFee || 0),
+        totalTransportFee: Number(bill.totalTransportFee || 0),
+        totalExamFee: bill.isExamFeeAdded ? Number(bill.totalExamFee || 0) : 0,
+        otherFee: Number(bill.otherFee || 0),
+        otherFeeMessage: String(bill.otherFeeMessage || ""),
+        extraClassesFee: Number(bill.extraClassesFee || 0),
+        totalDue: Number(bill.totalDue || 0),
+        lastMonthDue: Number(bill.lastMonthDue || 0),
         paidAmount: 0,
         paymentMode: "--",
       };
@@ -93,6 +108,7 @@ export const POST = async (request) => {
     return NextResponse.json({ status: 500, message: "Internal Server Error" });
   }
 };
+
 export const PUT = async (request) => {
   try {
     await connectDb();
@@ -102,20 +118,20 @@ export const PUT = async (request) => {
       return NextResponse.json({ status: 404, message: "Bill not found" });
     }
 
-    bill.otherFee = body.otherFee;
-    bill.otherFeeMessage = body.otherFeeMessage;
-    bill.paidAmount = body.paidAmount;
-    bill.lastMonthDue = body.lastMonthDue;
-    bill.totalDue = body.totalDue;
+    bill.otherFee = Number(body.otherFee || 0);
+    bill.otherFeeMessage = String(body.otherFeeMessage || "");
+    bill.paidAmount = Number(body.paidAmount || 0);
+    bill.lastMonthDue = Number(body.lastMonthDue || 0);
+    bill.totalDue = Number(body.totalDue || 0);
     let currentHistory = {
-      totalEducationFee: bill.totalEducationFee,
-      totalTransportFee: bill.totalTransportFee,
-      totalExamFee: bill.isExamFeeAdded ? bill.totalExamFee : 0,
-      otherFee: bill.otherFee,
-      otherFeeMessage: bill.otherFeeMessage,
-      extraClassesFee: bill.extraClassesFee,
-      totalDue: bill.totalDue,
-      lastMonthDue: bill.lastMonthDue,
+      totalEducationFee: Number(bill.totalEducationFee || 0),
+      totalTransportFee: Number(bill.totalTransportFee || 0),
+      totalExamFee: bill.isExamFeeAdded ? Number(bill.totalExamFee || 0) : 0,
+      otherFee: Number(bill.otherFee || 0),
+      otherFeeMessage: String(bill.otherFeeMessage || ""),
+      extraClassesFee: Number(bill.extraClassesFee || 0),
+      totalDue: Number(bill.totalDue || 0),
+      lastMonthDue: Number(bill.lastMonthDue || 0),
       paidAmount: 0,
       paymentMode: "--",
     };

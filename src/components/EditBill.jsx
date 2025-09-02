@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 
@@ -20,10 +20,22 @@ const EditBill = ({ pageId }) => {
     const [totalDue, setTotalDue] = useState(0)
     const [lastMonthDue, setLastMonthDue] = useState(0)
     const [extraClassesFee, setExtraClassesFee] = useState(0)
-    useEffect(() => {
-        handleCalculateBill()
+
+    const handleCalculateBill = useCallback(() => {
+        setTotalDue(
+            Number(totalEducationFee || 0) +
+            Number(totalTransportFee || 0) +
+            Number(otherFee || 0) +
+            Number(lastMonthDue || 0) +
+            Number(extraClassesFee || 0) +
+            (isExamFeeAdded ? Number(totalExamFee || 0) : 0) -
+            Number(paidAmount || 0)
+        )
     }, [totalEducationFee, totalTransportFee, otherFee, lastMonthDue, extraClassesFee, totalExamFee, paidAmount, isExamFeeAdded])
 
+    useEffect(() => {
+        handleCalculateBill()
+    }, [handleCalculateBill])
 
     useEffect(() => {
         if (!pageId) return
@@ -33,23 +45,26 @@ const EditBill = ({ pageId }) => {
                 setLoading(true)
                 setError(null)
                 const res = await fetch(`/api/studentsData?pageId=${pageId}`)
+                if (!res.ok) {
+                    throw new Error('Failed to fetch bill data');
+                }
                 const data = await res.json()
-                if (data.status != 200) {
+                if (data.status !== 200) {
                     toast.error("Something went wrong please refresh the page")
                     setError("Failed to fetch bill data")
                     return
                 }
 
-                setTotalEducationFee(data.studentBill.totalEducationFee || 0)
-                setTotalTransportFee(data.studentBill.totalTransportFee || 0)
-                setTotalExamFee(data.studentBill.totalExamFee || 0)
-                setOtherFee(data.studentBill.otherFee || 0)
-                setOtherFeeMessage(data.studentBill.otherFeeMessage || '')
-                setPaidAmount(data.studentBill.paidAmount || 0)
-                setTotalDue(data.studentBill.totalDue || 0)
-                setLastMonthDue(data.studentBill.lastMonthDue || 0)
-                setExtraClassesFee(data.studentBill.extraClassesFee || 0)
-                setIsExamFeeAdded(data.studentBill.isExamFeeAdded || false)
+                setTotalEducationFee(Number(data.studentBill?.totalEducationFee || 0))
+                setTotalTransportFee(Number(data.studentBill?.totalTransportFee || 0))
+                setTotalExamFee(Number(data.studentBill?.totalExamFee || 0))
+                setOtherFee(Number(data.studentBill?.otherFee || 0))
+                setOtherFeeMessage(data.studentBill?.otherFeeMessage || '')
+                setPaidAmount(Number(data.studentBill?.paidAmount || 0))
+                setTotalDue(Number(data.studentBill?.totalDue || 0))
+                setLastMonthDue(Number(data.studentBill?.lastMonthDue || 0))
+                setExtraClassesFee(Number(data.studentBill?.extraClassesFee || 0))
+                setIsExamFeeAdded(Boolean(data.studentBill?.isExamFeeAdded))
 
             } catch (error) {
                 console.error('Failed to fetch bill data:', error)
@@ -75,37 +90,32 @@ const EditBill = ({ pageId }) => {
                 },
                 body: JSON.stringify({
                     pageId,
-                    otherFee: Number(otherFee),
-                    otherFeeMessage,
-                    paidAmount: Number(paidAmount),
-                    totalDue: Number(totalDue),
-                    lastMonthDue: Number(lastMonthDue),
+                    otherFee: Number(otherFee || 0),
+                    otherFeeMessage: String(otherFeeMessage || ''),
+                    paidAmount: Number(paidAmount || 0),
+                    totalDue: Number(totalDue || 0),
+                    lastMonthDue: Number(lastMonthDue || 0),
                 }),
             })
+            
             if (!response.ok) {
-                toast.error('Failed to update bill')
+                throw new Error('Failed to update bill');
             }
-            setIsEditing(false)
-            toast.success("Bill updated successfully")
-            router.refresh()
+            
+            const data = await response.json();
+            if (data.status === 200) {
+                setIsEditing(false)
+                toast.success("Bill updated successfully")
+                router.refresh()
+            } else {
+                toast.error(data.message || 'Failed to update bill')
+            }
         } catch (error) {
             console.error('Failed to save bill:', error)
             toast.error("Failed to update bill")
         } finally {
             setLoading(false)
         }
-    }
-
-    const handleCalculateBill = async () => {
-        setTotalDue(
-            Number(totalEducationFee) +
-            Number(totalTransportFee) +
-            Number(otherFee) +
-            Number(lastMonthDue) +
-            Number(extraClassesFee) +
-            (isExamFeeAdded ? Number(totalExamFee) : 0) -
-            Number(paidAmount)
-        )
     }
 
     if (loading && !isEditing) {

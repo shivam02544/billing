@@ -11,7 +11,16 @@ const studentSchema = new Schema({
   transport: { type: Number },
   extraClassesFee: { type: Number },
   dueFee: Number,
+}, {
+  timestamps: true,
+  versionKey: false,
 });
+
+// Add indexes for better query performance
+studentSchema.index({ pageId: 1 });
+studentSchema.index({ className: 1 });
+studentSchema.index({ name: 1 });
+
 const StudentSchema =
   models.StudentSchema || model("StudentSchema", studentSchema);
 export default StudentSchema;

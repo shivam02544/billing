@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import FeeSchema from "@/models/feeSchema";
+import { connectDb } from "@/helper/connectDB";
+import FeeSchema from "@/models/feeModel";
 import StudentBillSchema from "@/models/studentBillModel";
 
 export const GET = async () => {
@@ -17,12 +18,12 @@ export const GET = async () => {
     let totalPaidFee = 0;
 
     bills.forEach((bill) => {
-      const edu = bill.totalEducationFee || 0;
-      const trans = bill.totalTransportFee || 0;
-      const exam = bill.isExamFeeAdded ? bill.totalExamFee || 0 : 0;
-      const other = bill.otherFee || 0;
-      const extra = bill.extraClassesFee || 0;
-      totalPaidFee += bill.paidAmount || 0;
+      const edu = Number(bill.totalEducationFee || 0);
+      const trans = Number(bill.totalTransportFee || 0);
+      const exam = bill.isExamFeeAdded ? Number(bill.totalExamFee || 0) : 0;
+      const other = Number(bill.otherFee || 0);
+      const extra = Number(bill.extraClassesFee || 0);
+      totalPaidFee += Number(bill.paidAmount || 0);
       totalStudentFee += edu + trans + exam + other + extra;
     });
 
@@ -33,7 +34,7 @@ export const GET = async () => {
     const feeSummary = {};
     feeDetails.forEach((fee) => {
       const className = fee.className;
-      const totalFee = fee.fee + fee.examFee;
+      const totalFee = Number(fee.fee || 0) + Number(fee.examFee || 0);
       feeSummary[className] = totalFee;
     });
 

@@ -3,7 +3,7 @@ import FeeSchema from "@/models/feeModel";
 import StudentBillSchema from "@/models/studentBillModel";
 import StudentSchema from "@/models/studentModel";
 import { NextResponse } from "next/server";
-let data;
+
 export const GET = async (request) => {
   try {
     await connectDb();
@@ -18,9 +18,15 @@ export const GET = async (request) => {
       });
     }
 
-    data = await Promise.all(
+    const data = await Promise.all(
       bills.studentIds.map(async (studentId) => {
         const studentData = await StudentSchema.findById(studentId.studentId);
+        
+        // Check if student exists
+        if (!studentData) {
+          return null;
+        }
+        
         const studentFeeDetail = await FeeSchema.findOne({
           className: studentData.className,
         });
@@ -28,19 +34,22 @@ export const GET = async (request) => {
         return {
           name: studentData.name,
           className: studentData.className,
-          tuitionFee: studentFeeDetail ? studentFeeDetail.fee : 0,
-          isExamFeeAdded: bills.isExamFeeAdded,
-          transportFee: studentData.transport ? studentData.transport : 0,
-          examFee: bills.isExamFeeAdded ? studentFeeDetail.examFee : 0,
-          otherFee: studentFeeDetail ? studentFeeDetail.otherFee : 0,
-          extraClassesFee: studentData.extraClassesFee || 0,
+          tuitionFee: studentFeeDetail ? Number(studentFeeDetail.fee || 0) : 0,
+          isExamFeeAdded: Boolean(bills.isExamFeeAdded),
+          transportFee: studentData.transport ? Number(studentData.transport || 0) : 0,
+          examFee: bills.isExamFeeAdded && studentFeeDetail ? Number(studentFeeDetail.examFee || 0) : 0,
+          otherFee: studentFeeDetail ? Number(studentFeeDetail.otherFee || 0) : 0,
+          extraClassesFee: Number(studentData.extraClassesFee || 0),
         };
       })
     );
 
+    // Filter out null values
+    const validData = data.filter(Boolean);
+
     return NextResponse.json({
       status: 200,
-      data,
+      data: validData,
       bills,
     });
   } catch (error) {
@@ -57,6 +66,14 @@ export const POST = async (request) => {
     const body = await request.json();
     const { pageId, totalAmount, paymentMode } = body;
 
+    // Validate required fields
+    if (!pageId || totalAmount === undefined || !paymentMode) {
+      return NextResponse.json({
+        status: 400,
+        message: "Missing required fields: pageId, totalAmount, or paymentMode",
+      });
+    }
+
     const bill = await StudentBillSchema.findOne({ pageId });
     if (!bill) {
       return NextResponse.json({
@@ -65,21 +82,26 @@ export const POST = async (request) => {
       });
     }
 
-    bill.paidAmount = Number(bill.paidAmount) + Number(totalAmount);
-    bill.totalDue = Number(bill.totalDue) - Number(totalAmount);
+    const numericTotalAmount = Number(totalAmount || 0);
+    const numericPaidAmount = Number(bill.paidAmount || 0);
+    const numericTotalDue = Number(bill.totalDue || 0);
+
+    bill.paidAmount = numericPaidAmount + numericTotalAmount;
+    bill.totalDue = numericTotalDue - numericTotalAmount;
     bill.billPaidMonth = new Date().getMonth();
+    
     let currentHistory = {
-      totalEducationFee: bill.totalEducationFee,
-      totalTransportFee: bill.totalTransportFee,
-      totalExamFee: bill.isExamFeeAdded ? bill.totalExamFee : 0,
-      otherFee: bill.otherFee,
-      otherFeeMessage: bill.otherFeeMessage ? bill.otherFeeMessage : "Other",
-      isExamFeeAdded: bill.isExamFeeAdded,
-      totalDue: bill.totalDue,
-      lastMonthDue: bill.lastMonthDue,
-      extraClassesFee: bill.extraClassesFee,
-      paidAmount: Number(totalAmount),
-      paymentMode: paymentMode,
+      totalEducationFee: Number(bill.totalEducationFee || 0),
+      totalTransportFee: Number(bill.totalTransportFee || 0),
+      totalExamFee: bill.isExamFeeAdded ? Number(bill.totalExamFee || 0) : 0,
+      otherFee: Number(bill.otherFee || 0),
+      otherFeeMessage: bill.otherFeeMessage ? String(bill.otherFeeMessage) : "Other",
+      isExamFeeAdded: Boolean(bill.isExamFeeAdded),
+      totalDue: Number(bill.totalDue || 0),
+      lastMonthDue: Number(bill.lastMonthDue || 0),
+      extraClassesFee: Number(bill.extraClassesFee || 0),
+      paidAmount: numericTotalAmount,
+      paymentMode: String(paymentMode),
     };
     bill.billPaymentHistory.push(currentHistory);
     await bill.save();

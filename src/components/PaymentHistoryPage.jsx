@@ -2,8 +2,18 @@
 
 import { formatDate } from "@/helper/converIntoDate";
 
+const PaymentHistory = ({ paymentHistory = [] }) => {
+    // Sanitize and validate payment history data
+    const sanitizeValue = (value) => {
+        if (value === null || value === undefined) return 0;
+        const num = Number(value);
+        return isNaN(num) ? 0 : num;
+    };
 
-const PaymentHistory = ({ paymentHistory }) => {
+    const sanitizeString = (value) => {
+        if (typeof value !== 'string') return '';
+        return value.replace(/[<>]/g, ''); // Basic XSS prevention
+    };
 
     return (
         <div className="min-h-screen bg-orange-50 p-4">
@@ -30,7 +40,7 @@ const PaymentHistory = ({ paymentHistory }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {paymentHistory.length > 0 ? (
+                            {paymentHistory && paymentHistory.length > 0 ? (
                                 paymentHistory.map((record, index) => {
                                     // Check if this is a subsequent payment in the same month
                                     const isSameMonthPayment = index > 0 &&
@@ -38,31 +48,35 @@ const PaymentHistory = ({ paymentHistory }) => {
 
                                     return (
                                         <tr key={index} className="text-center text-xs md:text-sm">
-                                            <td className="border border-orange-400 px-2 py-2">{formatDate(record.date)}</td>
                                             <td className="border border-orange-400 px-2 py-2">
-                                                {`₹${record.lastMonthDue}`}
+                                                {record.date ? formatDate(record.date) : 'N/A'}
                                             </td>
                                             <td className="border border-orange-400 px-2 py-2">
-                                                {`₹${record.totalEducationFee}`}
+                                                ₹{sanitizeValue(record.lastMonthDue)}
                                             </td>
                                             <td className="border border-orange-400 px-2 py-2">
-                                                {`₹${record.totalTransportFee}`}
+                                                ₹{sanitizeValue(record.totalEducationFee)}
                                             </td>
                                             <td className="border border-orange-400 px-2 py-2">
-                                                {`₹${record.totalExamFee}`}
+                                                ₹{sanitizeValue(record.totalTransportFee)}
                                             </td>
                                             <td className="border border-orange-400 px-2 py-2">
-                                                {`₹${record.extraClassesFee || 0}`}
+                                                ₹{sanitizeValue(record.totalExamFee)}
                                             </td>
                                             <td className="border border-orange-400 px-2 py-2">
-                                                {`₹${record.otherFee}`}
+                                                ₹{sanitizeValue(record.extraClassesFee)}
+                                            </td>
+                                            <td className="border border-orange-400 px-2 py-2">
+                                                ₹{sanitizeValue(record.otherFee)}
                                             </td>
                                             <td className="border border-orange-400 px-2 py-2 font-bold">
-                                                {`₹${record.paidAmount}`}
+                                                ₹{sanitizeValue(record.paidAmount)}
                                             </td>
-                                            <td className="border border-orange-400 px-2 py-2">{record.paymentMode}</td>
                                             <td className="border border-orange-400 px-2 py-2">
-                                                {`₹${record.totalDue}`}
+                                                {sanitizeString(record.paymentMode)}
+                                            </td>
+                                            <td className="border border-orange-400 px-2 py-2">
+                                                ₹{sanitizeValue(record.totalDue)}
                                             </td>
                                         </tr>
                                     );

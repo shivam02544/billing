@@ -3,15 +3,29 @@ import FeeSchema from "@/models/feeModel";
 import { NextResponse } from "next/server";
 
 export const GET = async (request) => {
-  await connectDb();
-  const fees = await FeeSchema.find();
-  return NextResponse.json({ status: 200, fees });
-};
-export const PUT = async (request) => {
-  await connectDb();
-  const { fees } = await request.json();
-  console.log(fees);
   try {
+    await connectDb();
+    const fees = await FeeSchema.find();
+    return NextResponse.json({ status: 200, fees });
+  } catch (error) {
+    console.error("Error fetching fees:", error);
+    return NextResponse.json({ status: 500, message: "Failed to fetch fees" });
+  }
+};
+
+export const PUT = async (request) => {
+  try {
+    await connectDb();
+    const { fees } = await request.json();
+    
+    if (!fees || !Array.isArray(fees)) {
+      return NextResponse.json({
+        status: 400,
+        message: "Invalid fees data provided",
+      });
+    }
+    
+    console.log(fees);
     await FeeSchema.deleteMany({});
     await FeeSchema.insertMany(fees);
     return NextResponse.json({

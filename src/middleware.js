@@ -1,24 +1,44 @@
 import { NextResponse } from "next/server";
+
 export async function middleware(request) {
-  const path = await request.nextUrl.pathname;
-  const token = (await request.cookies.get("token")?.value) || null;
+  try {
+    const path = request.nextUrl.pathname;
+    const token = request.cookies.get("token")?.value || null;
 
-  if (path === "/api/studentsCrud") {
-    return NextResponse.next();
-  }
-
-  if (path === "/") {
-    if (token == "npps6284@nauroo") {
-      return NextResponse.redirect(new URL(`/searchStudent`, request.url));
+    // Allow API routes to pass through
+    if (path.startsWith("/api/")) {
+      return NextResponse.next();
     }
-    return NextResponse.next();
-  } else {
+
+    // Handle root path
+    if (path === "/") {
+      if (token === "nppsnauroo") {
+        return NextResponse.redirect(new URL(`/searchStudent`, request.url));
+      }
+      return NextResponse.next();
+    }
+
+    // Check authentication for protected routes
     if (!token) {
       return NextResponse.redirect(new URL("/", request.url));
     }
+
+    // Validate token for protected routes
+    if (token !== "nppsnauroo") {
+      // Clear invalid token
+      const response = NextResponse.redirect(new URL("/", request.url));
+      response.cookies.delete("token");
+      return response;
+    }
+
     return NextResponse.next();
+  } catch (error) {
+    console.error("Middleware error:", error);
+    // On error, redirect to login
+    return NextResponse.redirect(new URL("/", request.url));
   }
 }
+
 export const config = {
   matcher: [
     "/",

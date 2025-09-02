@@ -87,8 +87,8 @@ const studentBillSchema = new Schema(
       default: 0,
     },
     billGeneratedMonth: {
-      type: String,
-      default: new Date().getMonth() - 1,
+      type: Number,
+      default: () => new Date().getMonth(),
     },
 
     totalDue: {
@@ -103,8 +103,8 @@ const studentBillSchema = new Schema(
       default: 0,
     },
     billPaidMonth: {
-      type: String,
-      default: new Date().getMonth() - 1,
+      type: Number,
+      default: () => new Date().getMonth(),
     },
     billPaymentHistory: [billPaymentHistorySchema],
   },
@@ -113,6 +113,11 @@ const studentBillSchema = new Schema(
     versionKey: false,
   }
 );
+
+// Add indexes for better query performance
+studentBillSchema.index({ pageId: 1 });
+studentBillSchema.index({ billGeneratedMonth: 1 });
+studentBillSchema.index({ "studentIds.studentId": 1 });
 
 const StudentBillSchema =
   models.StudentBillSchema || model("StudentBillSchema", studentBillSchema);
