@@ -19,7 +19,7 @@ export default function Home() {
     
     try {
       // In a real application, this should be handled server-side with proper authentication
-      if (username === "npps6284@nauroo") {
+      if (username === "nppsnauroo") {
         // Set cookie with proper security flags
         const expires = new Date();
         expires.setFullYear(expires.getFullYear() + 1); // 1 year expiry
