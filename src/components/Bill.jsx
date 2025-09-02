@@ -208,6 +208,7 @@ const Bill = ({ pageId }) => {
                             min="0"
                             step="0.01"
                             className="border border-orange-400 rounded-md p-2 w-full"
+onWheel={(e) => e.currentTarget.blur()} 
                             placeholder="Enter total amount"
                             value={totalAmount}
                             onChange={(e) => {
