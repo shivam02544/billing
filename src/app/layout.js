@@ -11,7 +11,10 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={` antialiased`}>
         {children}
-        <Toaster />
+        <Toaster
+          position="bottom-left"
+          reverseOrder={false}
+        />
       </body>
     </html>
   );
