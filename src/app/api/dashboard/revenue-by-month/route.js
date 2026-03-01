@@ -4,12 +4,16 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export const GET = async () => {
+export const GET = async (request) => {
   try {
+    const { searchParams } = new URL(request.url);
+    const yearParam = searchParams.get('year');
+    const targetYear = yearParam ? parseInt(yearParam, 10) : new Date().getFullYear();
+
     const db = await connectDb();
     const StudentBillSchema = db.models.StudentBillSchema || db.model("StudentBillSchema", studentBillSchema);
 
-    const bills = await StudentBillSchema.find({}, { billPaymentHistory: 1 });
+    const bills = await StudentBillSchema.find({}, { billPaymentHistory: 1, paidAmount: 1, billGeneratedMonth: 1, updatedAt: 1 });
 
     const monthlyRevenue = Array(12).fill(0);
 
@@ -19,18 +23,24 @@ export const GET = async () => {
         bill.billPaymentHistory.forEach((payment) => {
           if (payment.date && payment.paidAmount) {
             const date = new Date(payment.date);
-            const monthIndex = date.getMonth(); // 0 (Jan) to 11 (Dec)
-            monthlyRevenue[monthIndex] += Number(payment.paidAmount) || 0;
+            if (date.getFullYear() === targetYear) {
+              const monthIndex = date.getMonth(); // 0 (Jan) to 11 (Dec)
+              monthlyRevenue[monthIndex] += Number(payment.paidAmount) || 0;
+            }
           }
         });
       } else if (bill.paidAmount && Number(bill.paidAmount) > 0) {
         // Fallback: If no history exists but an amount was paid, attribute it to the bill's generated month, or current month
-        const monthIndex = bill.billGeneratedMonth !== undefined && bill.billGeneratedMonth !== null 
-          ? Number(bill.billGeneratedMonth) 
-          : new Date().getMonth();
+        const fallbackDate = bill.updatedAt ? new Date(bill.updatedAt) : new Date();
         
-        if (monthIndex >= 0 && monthIndex <= 11) {
-          monthlyRevenue[monthIndex] += Number(bill.paidAmount) || 0;
+        if (fallbackDate.getFullYear() === targetYear) {
+          const monthIndex = bill.billGeneratedMonth !== undefined && bill.billGeneratedMonth !== null 
+            ? Number(bill.billGeneratedMonth) 
+            : fallbackDate.getMonth();
+          
+          if (monthIndex >= 0 && monthIndex <= 11) {
+            monthlyRevenue[monthIndex] += Number(bill.paidAmount) || 0;
+          }
         }
       }
     });
