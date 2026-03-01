@@ -33,6 +33,8 @@ const Dashboard = () => {
   const [currentSession, setCurrentSession] = useState("");
   const [isMigrating, setIsMigrating] = useState(false);
 
+  const [revenueYear, setRevenueYear] = useState(new Date().getFullYear());
+
   useEffect(() => {
     // Fetch summary stats
     const fetchStats = async () => {
@@ -68,16 +70,6 @@ const Dashboard = () => {
       setStudentsByClassData(data);
     };
 
-    // Fetch monthly revenue
-    const fetchRevenueData = async () => {
-      const res = await fetch("/api/dashboard/revenue-by-month", {
-        cache: "no-store",
-        headers: { 'Cache-Control': 'no-cache' }
-      });
-      const data = await res.json();
-      if(data.status === 200) setRevenueData(data.data);
-    };
-
     // Fetch top defaulters
     const fetchDefaultersData = async () => {
       const res = await fetch("/api/dashboard/defaulters", {
@@ -91,10 +83,22 @@ const Dashboard = () => {
     fetchStats();
     fetchBarData();
     fetchStudentsByClassData();
-    fetchRevenueData();
     fetchDefaultersData();
     setCurrentSession(localStorage.getItem("currentSession") || "2025-2026");
   }, []);
+
+  useEffect(() => {
+    // Fetch monthly revenue with selected year
+    const fetchRevenueData = async () => {
+      const res = await fetch(`/api/dashboard/revenue-by-month?year=${revenueYear}`, {
+        cache: "no-store",
+        headers: { 'Cache-Control': 'no-cache' }
+      });
+      const data = await res.json();
+      if(data.status === 200) setRevenueData(data.data);
+    };
+    fetchRevenueData();
+  }, [revenueYear]);
 
   const handleMigrate = async () => {
     setIsMigrating(true);
@@ -123,6 +127,10 @@ const Dashboard = () => {
 
   const COLORS = ["#34D399", "#F87171"];
   
+  // Generate a list of years for the dropdown (from 2024 to current year + 1)
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: Math.max(currentYear - 2023 + 2, 3) }, (_, i) => 2024 + i);
+
   return (
     <>
     <ResponsiveMenu />
@@ -230,10 +238,21 @@ const Dashboard = () => {
         
         {/* Monthly Revenue Chart */}
         <div className="bg-white p-4 rounded-lg shadow-md lg:col-span-2">
-          <h2 className="text-lg font-semibold text-gray-700 mb-2 text-center lg:text-left">
-            Monthly Revenue Flow
-          </h2>
-          <ResponsiveContainer width="100%" height={300}>
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold text-gray-700 text-center sm:text-left mb-2 sm:mb-0">
+              Monthly Revenue Flow
+            </h2>
+            <select
+              value={revenueYear}
+              onChange={(e) => setRevenueYear(Number(e.target.value))}
+              className="px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-medium text-gray-700 bg-gray-50"
+            >
+              {yearOptions.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
+          <ResponsiveContainer width="100%" height={280}>
             <BarChart data={revenueData}>
               <XAxis dataKey="month" />
               <YAxis />
