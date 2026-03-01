@@ -32,9 +32,12 @@ export const GET = async () => {
         const student = studentMap.get(bill.studentIds?.[0]?.studentId);
         if (!student) return null;
 
+        const isSharedBill = bill.studentIds && bill.studentIds.length > 1;
+        const displayName = isSharedBill ? `${student.name} (+Siblings)` : student.name;
+
         return {
           studentId: student._id,
-          name: student.name,
+          name: displayName,
           className: student.className,
           fatherName: student.fatherName,
           contact: student.contact || "N/A",
