@@ -56,12 +56,7 @@ const Page = () => {
             toast.error('No bills to print');
             return;
         }
-        const noPrint = document.getElementsByClassName("no-print")
-        noPrint[0].style.display = "none"
-        noPrint[1].style.display = "none"
         window.print();
-        noPrint[0].style.display = "display"
-        noPrint[1].style.display = "flex"
     };
 
     return (
@@ -111,7 +106,7 @@ const Page = () => {
             <div className="w-full min-h-screen bg-white text-black m-0 p-0">
                 <div className='flex flex-wrap '>
                     {bills.map((bill, index) => (
-                        <div key={index} className='no-page-break border-2 border-black w-[22rem] flex flex-col items-center  m-3 p-2 relative' style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
+                        <div key={index} className='no-page-break border-2 border-black w-[22rem] flex flex-col items-center m-1 p-1 relative' style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
                             {/* Month Display - Top Right */}
                             <div className='absolute top-2 right-2 text-xs font-semibold text-gray-500'>
                                 On {months[bill.billGeneratedMonth]}

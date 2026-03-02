@@ -26,12 +26,7 @@ export default function AllStudentBills() {
         getBills()
     }, []);
     function printBill() {
-        const printButton = document.querySelector('button');
-        printButton.style.display = 'none';
         window.print();
-        printButton.style.display = 'block';
-
-
     }
     if (isLoading) {
         return (
@@ -48,9 +43,9 @@ export default function AllStudentBills() {
         bills &&
         <div className="w-full min-h-screen bg-white text-black m-0 p-0">
             {/* Print Button */}
-            <div className="flex justify-end mb-4">
+            <div className="flex justify-end mb-4 no-print">
                 <button
-                    className="bg-black text-white px-4 py-2 text-sm"
+                    className="bg-black text-white px-4 py-2 text-sm cursor-pointer hover:bg-gray-800"
                     onClick={printBill}
                 >
                     Print All Bills
