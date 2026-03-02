@@ -23,6 +23,7 @@ const Bill = ({ pageId }) => {
     const [paymentMode, setPaymentMode] = useState("CASH");
     const [showEditBill, setShowBill] = useState(false);
     const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
+    const [isSmsSending, setIsSmsSending] = useState(false);
 
     // Use SWR for automatic data fetching, caching, and revalidation
     const { data, error, isLoading, mutate } = useSWR(
@@ -60,6 +61,48 @@ const Bill = ({ pageId }) => {
     const students = data.data || [];
     const studentBillDetail = data.bills;
 
+    const handleSendSMS = async () => {
+        if (!students || students.length === 0) {
+            toast.error("No student data available to send SMS.");
+            return;
+        }
+
+        const primaryStudent = students[0];
+        if (!primaryStudent.contact) {
+            toast.error(`No contact number found for ${primaryStudent.name}.`);
+            return;
+        }
+
+        setIsSmsSending(true);
+        const loadingToast = toast.loading("Sending SMS in Hindi...");
+
+        try {
+            const response = await fetch("/api/sms/send", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    studentName: primaryStudent.name,
+                    totalDue: Number(studentBillDetail.totalDue || 0),
+                    // Assuming API expects an array of numbers
+                    phoneNumbers: [primaryStudent.contact]
+                })
+            });
+
+            const result = await response.json();
+            
+            if (response.ok && result.status === 200) {
+                toast.success(`Message sent to ${primaryStudent.contact} successfully!`, { id: loadingToast });
+            } else {
+                toast.error(`Failed to send SMS: ${result.message}`, { id: loadingToast });
+            }
+        } catch (error) {
+            console.error("SMS Error:", error);
+            toast.error("An error occurred while sending the SMS.", { id: loadingToast });
+        } finally {
+            setIsSmsSending(false);
+        }
+    };
+
     const handlePayment = async (pageId) => {
         if (!totalAmount || totalAmount <= 0) {
             toast.error("Please enter a valid amount to pay");
@@ -68,6 +111,7 @@ const Bill = ({ pageId }) => {
 
         setIsPaymentProcessing(true);
         try {
+// ... skipping unchanged handlePayment code block to save space. We use replace_file_content so exact mapping isn't blocked by missing identical content if start/end match exactly
             await fetch(`/api/calculateTotalFees`)
             const paymentData = {
                 pageId,
@@ -216,9 +260,20 @@ const Bill = ({ pageId }) => {
                         Bill Payment for {studentBillDetail.pageId}
                     </h2>
                     <div className="flex flex-wrap justify-center">
-                        <button onClick={() => setShowBill(true)} className="cursor-pointer px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm m-2">Edit bill</button>
-                        <button onClick={handleRegenerateBill} className="cursor-pointer px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm m-2">Re generate bill</button>
-                        <button onClick={handleDownloadPDF} className="cursor-pointer px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm m-2">Download PDF</button>
+                        <button onClick={() => setShowBill(true)} className="cursor-pointer px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm m-2 shadow-sm">Edit bill</button>
+                        <button onClick={handleRegenerateBill} className="cursor-pointer px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm m-2 shadow-sm">Re-generate bill</button>
+                        <button onClick={handleDownloadPDF} className="cursor-pointer px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm m-2 shadow-sm">Download PDF</button>
+                        <button 
+                            onClick={handleSendSMS} 
+                            disabled={isSmsSending}
+                            className={`cursor-pointer px-3 py-1 bg-amber-500 text-white rounded-md hover:bg-amber-600 text-sm m-2 shadow-sm flex items-center ${isSmsSending ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        >
+                            {isSmsSending ? (
+                                <><div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div> Sending...</>
+                            ) : (
+                                "💬 SMS Bill (Hindi)"
+                            )}
+                        </button>
                     </div>
 
                     {/* Responsive Table Wrapper */}

@@ -1,32 +1,53 @@
 import { NextResponse } from "next/server";
 
-export async function proxy(request) {
+export function proxy(request) {
   try {
     const path = request.nextUrl.pathname;
     const token = request.cookies.get("token")?.value || null;
-    const adminToken = process.env.ADMIN_TOKEN;
 
-    // Handle root path
+    // Define which routes require authentication
+    const protectedRoutes = [
+      "/dashboard",
+      "/searchStudent",
+      "/studentList",
+      "/addNewStudent",
+      "/studentBills",
+      "/getStudentsBill",
+      "/export-data",
+      "/generateBill",
+      "/payBill",
+      "/important-fees",
+      "/announcement",
+      "/About"
+    ];
+
+    const isProtectedRoute = protectedRoutes.some(
+      (route) => path === route || path.startsWith(`${route}/`)
+    );
+
+    // Handle root path (Login page)
     if (path === "/") {
-      if (token === adminToken) {
+      if (token) {
         return NextResponse.redirect(new URL(`/searchStudent`, request.url));
       }
       return NextResponse.next();
     }
 
     // Check authentication for protected routes and API routes
-    if (!token || token !== adminToken) {
+    if (!token) {
       if (path.startsWith("/api/")) {
-        return NextResponse.json({ status: 401, message: "Unauthorized" }, { status: 401 });
+        return NextResponse.json({ status: 401, message: "Unauthorized. Please log in." }, { status: 401 });
       }
-      const response = NextResponse.redirect(new URL("/", request.url));
-      response.cookies.delete("token");
-      return response;
+      if (isProtectedRoute) {
+        const response = NextResponse.redirect(new URL("/", request.url));
+        response.cookies.delete("token");
+        return response;
+      }
     }
 
     return NextResponse.next();
   } catch (error) {
-    console.error("Proxy error:", error);
+    console.error("Middleware error:", error);
     if (request.nextUrl.pathname.startsWith("/api/")) {
       return NextResponse.json({ status: 500, message: "Internal Server Error" }, { status: 500 });
     }
@@ -36,13 +57,6 @@ export async function proxy(request) {
 
 export const config = {
   matcher: [
-    "/",
-    "/dashboard",
-    "/addNewStudent",
-    "/searchStudent",
-    "/About",
-    "/generateBill",
-    "/studentBills",
-    "/api/:path*",
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };

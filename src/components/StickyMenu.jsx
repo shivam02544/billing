@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Menu, Settings, User, LogOut, ArrowUpRight, FileText } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Menu, Settings, User, LogOut, ArrowUpRight, FileText, Bell } from "lucide-react";
 
 export default function StickyMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
+  const pathname = usePathname();
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -23,6 +25,10 @@ export default function StickyMenu() {
     setIsOpen(false);
   };
 
+  if (pathname === '/studentBills' || pathname === '/getStudentsBill' || pathname === '/') {
+    return null;
+  }
+
   return (
     <div className="fixed top-24 right-4 z-40" ref={menuRef}>
       <div className="relative">
@@ -38,6 +44,17 @@ export default function StickyMenu() {
           <div className="absolute top-full right-0 mt-2 w-56 bg-white dark:bg-zinc-800 rounded-lg shadow-xl border border-gray-100 dark:border-zinc-700 overflow-hidden transform opacity-100 scale-100 transition-all origin-top-right">
             <div className="py-1 flex flex-col">
               
+              <button
+                onClick={() => handleLinkClick("/announcement")}
+                className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-700 flex items-center justify-between transition-colors group"
+              >
+                <div className="flex items-center gap-3">
+                  <Bell size={16} className="text-orange-500" />
+                  <span className="font-medium">Announcements</span>
+                </div>
+                <ArrowUpRight size={14} className="text-gray-400 group-hover:text-blue-500" />
+              </button>
+
               <button
                 onClick={() => handleLinkClick("/important-fees")}
                 className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-700 flex items-center justify-between transition-colors group"

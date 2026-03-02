@@ -38,6 +38,7 @@ export const GET = async (request) => {
         return {
           name: studentData.name,
           className: studentData.className,
+          contact: studentData.contact,
           tuitionFee: studentFeeDetail ? Number(studentFeeDetail.fee || 0) : 0,
           isExamFeeAdded: Boolean(bills.isExamFeeAdded),
           transportFee: studentData.transport ? Number(studentData.transport || 0) : 0,
