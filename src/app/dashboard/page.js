@@ -278,42 +278,26 @@ const Dashboard = () => {
       </div>
 
       {/* New Row: Monthly Revenue & Top Defaulters */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        
-        {/* Monthly Revenue Chart */}
-        <div className="bg-white p-4 rounded-lg shadow-md lg:col-span-2">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-700 text-center sm:text-left mb-2 sm:mb-0">
-              Monthly Revenue Flow
-            </h2>
-            <select
-              value={revenueYear}
-              onChange={(e) => setRevenueYear(Number(e.target.value))}
-              className="px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-medium text-gray-700 bg-gray-50"
-            >
-              {yearOptions.map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
-          </div>
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={revenueData}>
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip formatter={(value) => `₹${value}`} />
-              <Bar dataKey="revenue" fill="#10B981" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
       {isRevenueUnlocked && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           
           {/* Monthly Revenue Chart */}
           <div className="bg-white p-4 rounded-lg shadow-md lg:col-span-2">
-            <h2 className="text-lg font-semibold text-gray-700 mb-2 text-center lg:text-left">
-              Monthly Revenue Flow
-            </h2>
-            <ResponsiveContainer width="100%" height={300}>
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-700 text-center sm:text-left mb-2 sm:mb-0">
+                Monthly Revenue Flow
+              </h2>
+              <select
+                value={revenueYear}
+                onChange={(e) => setRevenueYear(Number(e.target.value))}
+                className="px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-medium text-gray-700 bg-gray-50"
+              >
+                {yearOptions.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </div>
+            <ResponsiveContainer width="100%" height={280}>
               <BarChart data={revenueData}>
                 <XAxis dataKey="month" />
                 <YAxis />
