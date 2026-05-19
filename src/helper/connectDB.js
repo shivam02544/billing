@@ -15,7 +15,7 @@ export const connectDb = async () => {
     // Validate environment variables
     validateEnvironment();
 
-    let session = "2025-2026";
+    let session = "2026-2027";
     try {
       const cookieStore = await cookies();
       const sessionCookie = cookieStore.get("currentSession");
@@ -28,7 +28,7 @@ export const connectDb = async () => {
     }
 
     let targetDbName = "newnpps";
-    if (session && session !== "2025-2026") {
+    if (session && session !== "2026-2027") {
       targetDbName = `npps${session}`;
       console.log(targetDbName);
       

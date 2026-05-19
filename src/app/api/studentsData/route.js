@@ -90,7 +90,7 @@ export const POST = async (request) => {
       transport: Number(transport || 0),
       dueFee: Number(dueFee || 0),
       extraClassesFee: Number(extraClassesFee || 0),
-      session: session || "2025-2026",
+      session: session || "2026-2027",
     });
 
     const studentData = await newStudent.save();

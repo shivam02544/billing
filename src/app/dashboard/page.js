@@ -109,7 +109,7 @@ const Dashboard = () => {
     fetchStudentsByClassData();
     fetchRevenueData();
     fetchDefaultersData();
-    setCurrentSession(localStorage.getItem("currentSession") || "2025-2026");
+    setCurrentSession(localStorage.getItem("currentSession") || "2026-2027");
   }, []);
 
   const handleMigrate = async () => {
@@ -119,7 +119,7 @@ const Dashboard = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sourceSession: "2025-2026",
+          sourceSession: "2026-2027",
           targetSession: currentSession
         })
       });
@@ -148,12 +148,12 @@ const Dashboard = () => {
       </h1>
 
       {/* Session Migration Prompt */}
-      {currentSession !== "2025-2026" && stats.totalStudents === 0 && (
+      {currentSession !== "2026-2027" && stats.totalStudents === 0 && (
         <div className="bg-blue-100 hover:bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-5 mb-6 rounded-lg shadow-md flex flex-col md:flex-row justify-between items-start md:items-center transition-colors">
           <div className="mb-4 md:mb-0">
             <h3 className="font-bold text-lg">New Session Detected ({currentSession})</h3>
             <p className="text-sm mt-1">It looks like the <b>{currentSession}</b> database is currently empty.</p>
-            <p className="text-sm">Would you like to initialize this session by copying Students & Fees from 2025-2026?</p>
+            <p className="text-sm">Would you like to initialize this session by copying Students & Fees from 2026-2027?</p>
             <p className="text-xs mt-2 text-red-600 font-semibold italic">* Note: All dues, extra classes fees, and previous transactions will be completely reset to zero.</p>
           </div>
           <button 
