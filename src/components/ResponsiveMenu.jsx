@@ -5,50 +5,37 @@ import { Menu, X, ChevronDown, UserPlus, FileText, Receipt, CreditCard, LayoutDa
 import Link from "next/link";
 import toast from "react-hot-toast";
 
-const CURRENT_SESSION = "2026-2027";
-
 const MORE_LINKS = [
-  { href: "/addNewStudent",  label: "Add New Student", icon: UserPlus },
-  { href: "/generateBill",   label: "Generate Bills",  icon: Receipt },
-  { href: "/About",          label: "Fee Structure",   icon: FileText },
-  { href: "/icard-fee",      label: "iCard Fee",       icon: CreditCard },
+  { href: "/addNewStudent", label: "Add New Student", icon: UserPlus },
+  { href: "/generateBill",  label: "Generate Bills",  icon: Receipt },
+  { href: "/About",         label: "Fee Structure",   icon: FileText },
+  { href: "/icard-fee",     label: "iCard Fee",       icon: CreditCard },
 ];
 
 const SimpleMenu = () => {
-  const [mobileOpen, setMobileOpen]   = useState(false);
-  const [moreOpen,   setMoreOpen]     = useState(false);
-  const [session]                     = useState(CURRENT_SESSION);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [moreOpen,   setMoreOpen]   = useState(false);
+  const [session,    setSession]    = useState("2026-2027");
 
   const navRef  = useRef(null);
   const moreRef = useRef(null);
 
-  /* Lock session cookie on mount */
+  /* Read stored session on mount — default to 2026-2027 (current) */
   useEffect(() => {
-    localStorage.setItem("currentSession", CURRENT_SESSION);
-    document.cookie = `currentSession=${CURRENT_SESSION}; path=/; max-age=${60 * 60 * 24 * 365}`;
+    const stored = localStorage.getItem("currentSession");
+    const active = stored || "2026-2027";
+    setSession(active);
+    localStorage.setItem("currentSession", active);
+    document.cookie = `currentSession=${active}; path=/; max-age=${60 * 60 * 24 * 365}`;
   }, []);
 
-  /* Close mobile menu on outside click */
-  useEffect(() => {
-    const handler = (e) => {
-      if (navRef.current && !navRef.current.contains(e.target)) {
-        setMobileOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  /* Close "More" dropdown on outside click */
-  useEffect(() => {
-    const handler = (e) => {
-      if (moreRef.current && !moreRef.current.contains(e.target)) {
-        setMoreOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  const handleSessionChange = (e) => {
+    const newSession = e.target.value;
+    setSession(newSession);
+    localStorage.setItem("currentSession", newSession);
+    document.cookie = `currentSession=${newSession}; path=/; max-age=${60 * 60 * 24 * 365}`;
+    window.location.reload(); // reload so all API calls pick up the new session cookie
+  };
 
   const handleLogout = () => {
     document.cookie = "token=;";
@@ -56,23 +43,47 @@ const SimpleMenu = () => {
     window.location.reload();
   };
 
+  /* Close mobile menu on outside click */
+  useEffect(() => {
+    const handler = (e) => {
+      if (navRef.current && !navRef.current.contains(e.target)) setMobileOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  /* Close More dropdown on outside click */
+  useEffect(() => {
+    const handler = (e) => {
+      if (moreRef.current && !moreRef.current.contains(e.target)) setMoreOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   return (
     <nav ref={navRef} className="bg-orange-600 text-white p-4 z-30 sticky top-0 w-full shadow-md">
       <div className="flex justify-between items-center max-w-5xl mx-auto">
 
         {/* Brand */}
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold tracking-wide">NPPS</h1>
-          <span
-            title="Current session — locked"
-            className="hidden sm:inline-block bg-orange-700 text-orange-100 text-xs font-semibold rounded-full px-2.5 py-0.5 border border-orange-500 cursor-default select-none"
-          >
-            {session}
-          </span>
-        </div>
+        <h1 className="text-xl font-bold tracking-wide">NPPS</h1>
 
         {/* ── Desktop links ───────────────────────────────── */}
         <ul className="hidden md:flex gap-6 items-center font-semibold text-sm">
+
+          {/* Session switcher */}
+          <li>
+            <select
+              value={session}
+              onChange={handleSessionChange}
+              className="bg-orange-700 text-white text-sm font-semibold rounded px-2 py-1 outline-none border border-orange-500 cursor-pointer hover:bg-orange-800 transition"
+              title="Switch session"
+            >
+              <option value="2026-2027">2026-2027 (Current)</option>
+              <option value="2025-2026" disabled>2025-2026 (Old — Locked)</option>
+            </select>
+          </li>
+
           <li>
             <Link href="/dashboard" className="hover:text-orange-200 transition flex items-center gap-1.5">
               <LayoutDashboard size={15} /> Dashboard
@@ -121,11 +132,16 @@ const SimpleMenu = () => {
           </li>
         </ul>
 
-        {/* ── Mobile hamburger ────────────────────────────── */}
+        {/* ── Mobile: session + hamburger ─────────────────── */}
         <div className="md:hidden flex items-center gap-3">
-          <span className="bg-orange-700 text-orange-100 text-xs font-semibold rounded-full px-2.5 py-0.5 border border-orange-500 select-none">
-            {session}
-          </span>
+          <select
+            value={session}
+            onChange={handleSessionChange}
+            className="bg-orange-700 text-white text-xs font-semibold rounded px-2 py-1 outline-none border border-orange-500"
+          >
+            <option value="2026-2027">2026-2027</option>
+            <option value="2025-2026" disabled>2025-2026 (Locked)</option>
+          </select>
           <button onClick={() => setMobileOpen((o) => !o)} className="focus:outline-none">
             {mobileOpen ? <X size={26} /> : <Menu size={26} />}
           </button>
@@ -138,9 +154,9 @@ const SimpleMenu = () => {
 
           {/* Primary links */}
           {[
-            { href: "/dashboard",     label: "Dashboard",  Icon: LayoutDashboard },
+            { href: "/dashboard",     label: "Dashboard",      Icon: LayoutDashboard },
             { href: "/searchStudent", label: "Search Students", Icon: Search },
-            { href: "/payBill",       label: "Pay Bill",   Icon: Receipt },
+            { href: "/payBill",       label: "Pay Bill",        Icon: Receipt },
           ].map(({ href, label, Icon }) => (
             <Link
               key={href}
@@ -155,7 +171,7 @@ const SimpleMenu = () => {
           {/* Divider */}
           <div className="border-t border-orange-500 my-1" />
 
-          {/* More items */}
+          {/* More section */}
           <p className="text-orange-300 text-xs font-semibold uppercase tracking-wider px-3 mb-1">More</p>
           {MORE_LINKS.map(({ href, label, icon: Icon }) => (
             <Link
