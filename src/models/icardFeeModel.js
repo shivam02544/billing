@@ -14,15 +14,25 @@ const icardFeeSchema = new Schema(
       default: null,
       set: (value) => (value ? value.toUpperCase().trim() : null),
     },
-    status: {
-      type: String,
-      enum: ["TAKEN", "NO_DUE"],
-      required: true,
+
+    // iCard physically given/issued to the student
+    isTaken: {
+      type: Boolean,
+      default: false,
     },
+
+    // iCard fee has been paid — no money is due
+    isPaid: {
+      type: Boolean,
+      default: false,
+    },
+
+    // Any remaining due amount (only relevant when isPaid is false)
     dueAmount: {
       type: Number,
       default: 0,
     },
+
     note: {
       type: String,
       default: "",
@@ -42,5 +52,7 @@ const icardFeeSchema = new Schema(
 icardFeeSchema.index({ name: 1 });
 icardFeeSchema.index({ session: 1 });
 icardFeeSchema.index({ studentPageId: 1 });
+icardFeeSchema.index({ isTaken: 1 });
+icardFeeSchema.index({ isPaid: 1 });
 
 export default icardFeeSchema;
