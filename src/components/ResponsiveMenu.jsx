@@ -80,7 +80,7 @@ const SimpleMenu = () => {
               title="Switch session"
             >
               <option value="2026-2027">2026-2027 (Current)</option>
-              <option value="2025-2026" disabled>2025-2026 (Old — Locked)</option>
+              <option value="2025-2026">2025-2026 (Old)</option>
             </select>
           </li>
 
@@ -140,7 +140,7 @@ const SimpleMenu = () => {
             className="bg-orange-700 text-white text-xs font-semibold rounded px-2 py-1 outline-none border border-orange-500"
           >
             <option value="2026-2027">2026-2027</option>
-            <option value="2025-2026" disabled>2025-2026 (Locked)</option>
+            <option value="2025-2026">2025-2026</option>
           </select>
           <button onClick={() => setMobileOpen((o) => !o)} className="focus:outline-none">
             {mobileOpen ? <X size={26} /> : <Menu size={26} />}
