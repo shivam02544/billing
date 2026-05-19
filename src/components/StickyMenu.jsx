@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, Settings, User, LogOut, ArrowUpRight, FileText, Bell } from "lucide-react";
+import { Menu, Settings, ArrowUpRight, FileText, Bell, CreditCard } from "lucide-react";
 
 export default function StickyMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,7 +25,7 @@ export default function StickyMenu() {
     setIsOpen(false);
   };
 
-  if (pathname === '/studentBills' || pathname === '/getStudentsBill' || pathname === '/') {
+  if (pathname === '/studentBills' || pathname === '/getStudentsBill' || pathname === '/' || pathname === '/icard-fee') {
     return null;
   }
 
@@ -62,6 +62,17 @@ export default function StickyMenu() {
                 <div className="flex items-center gap-3">
                   <FileText size={16} className="text-orange-500" />
                   <span className="font-medium">Important Fees</span>
+                </div>
+                <ArrowUpRight size={14} className="text-gray-400 group-hover:text-blue-500" />
+              </button>
+
+              <button
+                onClick={() => handleLinkClick("/icard-fee")}
+                className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-700 flex items-center justify-between transition-colors group"
+              >
+                <div className="flex items-center gap-3">
+                  <CreditCard size={16} className="text-orange-500" />
+                  <span className="font-medium">iCard Fee</span>
                 </div>
                 <ArrowUpRight size={14} className="text-gray-400 group-hover:text-blue-500" />
               </button>

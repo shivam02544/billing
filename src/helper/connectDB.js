@@ -15,7 +15,7 @@ export const connectDb = async () => {
     // Validate environment variables
     validateEnvironment();
 
-    let session = "2025-2026";
+    let session = "2026-2027";
     try {
       const cookieStore = await cookies();
       const sessionCookie = cookieStore.get("currentSession");
@@ -27,12 +27,12 @@ export const connectDb = async () => {
       // In case cookies() cannot be evaluated statically
     }
 
-    let targetDbName = "newnpps";
-    if (session && session !== "2025-2026") {
-      targetDbName = `npps${session}`;
-      console.log(targetDbName);
-      
-    }
+    // DB mapping:
+    //   2025-2026  →  newnpps        (legacy DB, old data)
+    //   2026-2027  →  npps2026-2027  (current DB, new data)
+    //   any future →  npps{session}
+    let targetDbName = session === "2025-2026" ? "newnpps" : `npps${session}`;
+    console.log(`Session: ${session} → DB: ${targetDbName}`);
 
     // Check if we already have a cached connection for this specific DB
     if (cachedConnections[targetDbName]) {

@@ -1,0 +1,46 @@
+import { Schema } from "mongoose";
+
+const icardFeeSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      set: (value) => value.toUpperCase().trim(),
+      trim: true,
+    },
+    // Optional: link to a student document if the student exists in DB
+    studentPageId: {
+      type: String,
+      default: null,
+      set: (value) => (value ? value.toUpperCase().trim() : null),
+    },
+    status: {
+      type: String,
+      enum: ["TAKEN", "NO_DUE"],
+      required: true,
+    },
+    dueAmount: {
+      type: Number,
+      default: 0,
+    },
+    note: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    session: {
+      type: String,
+      default: "2026-2027",
+    },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+);
+
+icardFeeSchema.index({ name: 1 });
+icardFeeSchema.index({ session: 1 });
+icardFeeSchema.index({ studentPageId: 1 });
+
+export default icardFeeSchema;
