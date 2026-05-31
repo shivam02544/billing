@@ -146,7 +146,7 @@ const Page = () => {
                                     <span>₹{bill.totalDue}</span>
                                 </div>
                             </div>
-                            <div className='flex justify-center my-1'>
+                            <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 opacity-70 pointer-events-none'>
                                 <UpiQrCode amount={bill.totalDue} billReference={bill.pageId} size={80} />
                             </div>
                             <div className='text-xs flex flex-col w-[96%] border-[1px] border-black mb-2 p-1'>
