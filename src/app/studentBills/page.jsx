@@ -1,5 +1,6 @@
 "use client"
 import React, { useEffect, useState } from "react";
+import UpiQrCode from "@/components/UpiQrCode";
 
 export default function AllStudentBills() {
     const [bills, setBills] = useState([]);
@@ -93,6 +94,9 @@ export default function AllStudentBills() {
                                 <span>TOTAL DUES:</span>
                                 <span>₹{bill.totalDue}</span>
                             </div>
+                        </div>
+                        <div className='flex justify-center my-1'>
+                            <UpiQrCode amount={bill.totalDue} billReference={bill.pageId} size={80} />
                         </div>
                         <div className='text-xs flex flex-col w-[96%] border-[1px] border-black mb-2 p-1'>
                             <span>1. Fee Payment date is from 1st to 10th of every month.</span>

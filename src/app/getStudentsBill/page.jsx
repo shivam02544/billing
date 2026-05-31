@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import ResponsiveMenu from "@/components/ResponsiveMenu";
 import toast from 'react-hot-toast';
+import UpiQrCode from "@/components/UpiQrCode";
 
 const months = [
     'January',
@@ -144,6 +145,9 @@ const Page = () => {
                                     <span>TOTAL DUES:</span>
                                     <span>₹{bill.totalDue}</span>
                                 </div>
+                            </div>
+                            <div className='flex justify-center my-1'>
+                                <UpiQrCode amount={bill.totalDue} billReference={bill.pageId} size={80} />
                             </div>
                             <div className='text-xs flex flex-col w-[96%] border-[1px] border-black mb-2 p-1'>
                                 <span>1. Fee Payment date is from 1st to 10th of every month.</span>

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import EditBill from "./EditBill";
+import UpiQrCode from "./UpiQrCode";
 
 // Fetcher function for SWR
 const fetcher = (url) => fetch(url).then((res) => {
@@ -169,7 +170,7 @@ const Bill = ({ pageId }) => {
         }
     }
 
-    const handleDownloadPDF = () => {
+    const handleDownloadPDF = async () => {
         const doc = new jsPDF();
         
         doc.setFontSize(20);
@@ -241,6 +242,26 @@ const Bill = ({ pageId }) => {
         doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
         doc.text(`Grand Total (Due): INR ${Number(studentBillDetail.totalDue || 0)}`, 14, finalY + 26);
+
+        // Add UPI QR code to PDF if configured
+        const upiId = process.env.NEXT_PUBLIC_SCHOOL_UPI_ID;
+        const schoolName = process.env.NEXT_PUBLIC_SCHOOL_NAME || "SCHOOL";
+        if (upiId && Number(studentBillDetail.totalDue || 0) > 0) {
+            try {
+                const QRCode = await import("qrcode");
+                const encodedName = encodeURIComponent(schoolName);
+                const encodedRef = encodeURIComponent(studentBillDetail.pageId || "");
+                const upiUri = `upi://pay?pa=${upiId}&pn=${encodedName}&am=${Number(studentBillDetail.totalDue).toFixed(2)}&cu=INR&tr=${encodedRef}`;
+                const qrDataUrl = await QRCode.toDataURL(upiUri, { width: 80, margin: 1, errorCorrectionLevel: "M" });
+                const qrY = finalY + 38;
+                doc.setFontSize(9);
+                doc.setFont("helvetica", "normal");
+                doc.text("Scan to Pay via UPI:", 14, qrY);
+                doc.addImage(qrDataUrl, "PNG", 14, qrY + 4, 28, 28);
+            } catch (qrErr) {
+                console.error("QR PDF generation failed:", qrErr);
+            }
+        }
 
         doc.save(`${studentBillDetail.pageId}_Bill.pdf`);
         toast.success("PDF Downloaded successfully!");
@@ -327,6 +348,11 @@ const Bill = ({ pageId }) => {
                     {/* Grand Total Calculation */}
                     <div className="text-right font-semibold text-orange-900 mt-2 text-sm md:text-base">
                         Grand Total (After Payment): ₹{Number(studentBillDetail.totalDue || 0)}
+                    </div>
+
+                    {/* UPI QR Code */}
+                    <div className="flex justify-end mt-3">
+                        <UpiQrCode amount={studentBillDetail.totalDue} billReference={studentBillDetail.pageId} size={110} />
                     </div>
 
                     {/* Total Amount and Payment Mode Input */}
