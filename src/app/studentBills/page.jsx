@@ -1,5 +1,6 @@
 "use client"
 import React, { useEffect, useState } from "react";
+import UpiQrCode from "@/components/UpiQrCode";
 
 export default function AllStudentBills() {
     const [bills, setBills] = useState([]);
@@ -81,7 +82,7 @@ export default function AllStudentBills() {
                                 <span>ADDRESS: {bill.village}</span>
                             </div>
                         </div>
-                        <div className='flex flex-col w-[96%] my-1 text-xs'>
+                        <div className='flex flex-col w-[96%] my-1 text-xs relative'>
                             {bill.tuitionFee != 0 ? <div className='flex justify-between'><span>SCHOOL FEE:</span><span>₹{bill.tuitionFee}</span></div> : <br />}
                             {bill.transportFee != 0 ? <div className='flex justify-between'><span>TRANSPORT FEE:</span><span>₹{bill.transportFee}</span></div> : <br />}
                             {bill.isExamFeeAdded && <div className='flex justify-between'><span>EXAM FEE:</span><span>₹{bill.examFee}</span></div>}
@@ -92,6 +93,9 @@ export default function AllStudentBills() {
                             <div className='flex justify-between font-bold'>
                                 <span>TOTAL DUES:</span>
                                 <span>₹{bill.totalDue}</span>
+                            </div>
+                            <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 opacity-70 pointer-events-none'>
+                                <UpiQrCode amount={bill.totalDue} billReference={bill.pageId} size={70} />
                             </div>
                         </div>
                         <div className='text-xs flex flex-col w-[96%] border-[1px] border-black mb-2 p-1'>
