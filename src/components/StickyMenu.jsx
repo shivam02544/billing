@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, Settings, ArrowUpRight, FileText, Bell, CreditCard } from "lucide-react";
+import { Menu, Settings, ArrowUpRight, FileText, Bell, CreditCard, Calculator } from "lucide-react";
 
 export default function StickyMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -84,6 +84,17 @@ export default function StickyMenu() {
                 <div className="flex items-center gap-3">
                   <FileText size={16} className="text-gray-500 dark:text-gray-400" />
                   <span>Database Tools</span>
+                </div>
+                <ArrowUpRight size={14} className="text-gray-400 group-hover:text-blue-500" />
+              </button>
+
+              <button
+                onClick={() => handleLinkClick("/age-calculator")}
+                className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-700 flex items-center justify-between transition-colors group"
+              >
+                <div className="flex items-center gap-3">
+                  <Calculator size={16} className="text-indigo-500" />
+                  <span className="font-medium">Age Calculator</span>
                 </div>
                 <ArrowUpRight size={14} className="text-gray-400 group-hover:text-blue-500" />
               </button>
