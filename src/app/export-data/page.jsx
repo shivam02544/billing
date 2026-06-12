@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { DownloadCloud, FileSpreadsheet, AlertCircle } from "lucide-react";
+import ResponsiveMenu from "@/components/ResponsiveMenu";
 
 export default function ExportDataPage() {
   const [isExporting, setIsExporting] = useState(false);
@@ -69,7 +70,9 @@ export default function ExportDataPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-zinc-900 flex items-center justify-center p-4">
+    <>
+      <ResponsiveMenu />
+      <div className="min-h-screen bg-gray-50 dark:bg-zinc-900 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white dark:bg-zinc-800 rounded-2xl shadow-xl overflow-hidden animate-fadeIn">
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-center">
           <div className="bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
@@ -110,5 +113,6 @@ export default function ExportDataPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

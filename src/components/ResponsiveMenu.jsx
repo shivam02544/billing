@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Menu, X, ChevronDown, UserPlus, FileText, Receipt, CreditCard, LayoutDashboard, Search, LogOut, Calculator } from "lucide-react";
+import {
+  Menu, X, ChevronDown, UserPlus, FileText, Receipt,
+  CreditCard, LayoutDashboard, Search, LogOut, Calculator, CalendarDays
+} from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
 
 const MORE_LINKS = [
@@ -13,15 +17,23 @@ const MORE_LINKS = [
   { href: "/age-calculator", label: "Age Calculator",   icon: Calculator },
 ];
 
+const PRIMARY_LINKS = [
+  { href: "/dashboard",     label: "Dashboard",  icon: LayoutDashboard },
+  { href: "/searchStudent", label: "Search",     icon: Search          },
+  { href: "/payBill",       label: "Pay Bill",   icon: Receipt         },
+];
+
 const SimpleMenu = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [moreOpen,   setMoreOpen]   = useState(false);
   const [session,    setSession]    = useState("2026-2027");
+  const [scrolled,   setScrolled]   = useState(false);
 
-  const navRef  = useRef(null);
-  const moreRef = useRef(null);
+  const pathname = usePathname();
+  const navRef   = useRef(null);
+  const moreRef  = useRef(null);
 
-  /* Read stored session on mount — default to 2026-2027 (current) */
+  /* Read stored session on mount */
   useEffect(() => {
     const stored = localStorage.getItem("currentSession");
     const active = stored || "2026-2027";
@@ -30,17 +42,24 @@ const SimpleMenu = () => {
     document.cookie = `currentSession=${active}; path=/; max-age=${60 * 60 * 24 * 365}`;
   }, []);
 
+  /* Scroll detection for nav elevation */
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   const handleSessionChange = (e) => {
     const newSession = e.target.value;
     setSession(newSession);
     localStorage.setItem("currentSession", newSession);
     document.cookie = `currentSession=${newSession}; path=/; max-age=${60 * 60 * 24 * 365}`;
-    window.location.reload(); // reload so all API calls pick up the new session cookie
+    window.location.reload();
   };
 
   const handleLogout = () => {
     document.cookie = "token=;";
-    toast.success("Logout successfully...");
+    toast.success("Logged out successfully!");
     window.location.reload();
   };
 
@@ -62,64 +81,100 @@ const SimpleMenu = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  const isActive = (href) => pathname === href;
+
   return (
-    <nav ref={navRef} className="bg-orange-600 text-white p-4 z-30 sticky top-0 w-full shadow-md">
-      <div className="flex justify-between items-center max-w-5xl mx-auto">
+    <nav
+      ref={navRef}
+      className={`bg-orange-600 text-white z-30 sticky top-0 w-full transition-shadow duration-200 ${
+        scrolled ? "shadow-lg shadow-orange-900/20" : "shadow-md"
+      }`}
+    >
+      <div className="flex justify-between items-center max-w-6xl mx-auto px-4 h-14">
 
         {/* Brand */}
-        <h1 className="text-xl font-bold tracking-wide">NPPS</h1>
+        <Link href="/dashboard" className="flex items-center gap-2 group">
+          <span className="text-xl font-extrabold tracking-wide group-hover:text-orange-100 transition-colors">
+            NPPS
+          </span>
+          <span className="hidden sm:inline text-[10px] text-orange-200 font-medium leading-tight max-w-[100px]">
+            School Management
+          </span>
+        </Link>
 
-        {/* ── Desktop links ───────────────────────────────── */}
-        <ul className="hidden md:flex gap-6 items-center font-semibold text-sm">
+        {/* ── Desktop links ─────────────────────────── */}
+        <ul className="hidden md:flex gap-1 items-center font-semibold text-sm">
 
           {/* Session switcher */}
           <li>
-            <select
-              value={session}
-              onChange={handleSessionChange}
-              className="bg-orange-700 text-white text-sm font-semibold rounded px-2 py-1 outline-none border border-orange-500 cursor-pointer hover:bg-orange-800 transition"
-              title="Switch session"
-            >
-              <option value="2026-2027">2026-2027 (Current)</option>
-              <option value="2025-2026">2025-2026 (Old)</option>
-            </select>
+            <div className="flex items-center gap-1.5 bg-orange-700 rounded-lg px-2.5 py-1.5 mr-2 border border-orange-500">
+              <CalendarDays size={13} className="text-orange-200" />
+              <select
+                value={session}
+                onChange={handleSessionChange}
+                className="bg-transparent text-white text-xs font-semibold outline-none cursor-pointer"
+                title="Switch session"
+              >
+                <option value="2026-2027">2026-2027 (Current)</option>
+                <option value="2025-2026">2025-2026 (Old)</option>
+              </select>
+            </div>
           </li>
 
-          <li>
-            <Link href="/dashboard" className="hover:text-orange-200 transition flex items-center gap-1.5">
-              <LayoutDashboard size={15} /> Dashboard
-            </Link>
-          </li>
-          <li>
-            <Link href="/searchStudent" className="hover:text-orange-200 transition flex items-center gap-1.5">
-              <Search size={15} /> Search
-            </Link>
-          </li>
-          <li>
-            <Link href="/payBill" className="hover:text-orange-200 transition flex items-center gap-1.5">
-              <Receipt size={15} /> Pay Bill
-            </Link>
-          </li>
+          {PRIMARY_LINKS.map(({ href, label, icon: Icon }) => (
+            <li key={href}>
+              <Link
+                href={href}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
+                  isActive(href)
+                    ? "bg-white/20 text-white font-bold"
+                    : "hover:bg-white/10 hover:text-orange-100"
+                }`}
+              >
+                <Icon size={14} />
+                {label}
+                {isActive(href) && (
+                  <span className="block w-1 h-1 rounded-full bg-white ml-0.5" />
+                )}
+              </Link>
+            </li>
+          ))}
 
           {/* More dropdown */}
           <li ref={moreRef} className="relative">
             <button
               onClick={() => setMoreOpen((o) => !o)}
-              className="flex items-center gap-1 hover:text-orange-200 transition focus:outline-none"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
+                moreOpen ? "bg-white/20" : "hover:bg-white/10"
+              } focus:outline-none`}
             >
-              More <ChevronDown size={14} className={`transition-transform ${moreOpen ? "rotate-180" : ""}`} />
+              More
+              <ChevronDown
+                size={14}
+                className={`transition-transform duration-200 ${moreOpen ? "rotate-180" : ""}`}
+              />
             </button>
             {moreOpen && (
-              <div className="absolute top-full right-0 mt-2 w-48 bg-white text-gray-700 rounded-xl shadow-xl border border-orange-100 overflow-hidden z-50">
+              <div className="absolute top-full right-0 mt-2 w-52 bg-white text-gray-700 rounded-xl shadow-xl border border-orange-100 overflow-hidden z-50 animate-slideDown">
+                <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-orange-400">
+                  More Options
+                </div>
                 {MORE_LINKS.map(({ href, label, icon: Icon }) => (
                   <Link
                     key={href}
                     href={href}
                     onClick={() => setMoreOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-orange-50 transition"
+                    className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                      isActive(href)
+                        ? "bg-orange-50 text-orange-600 font-semibold"
+                        : "hover:bg-orange-50"
+                    }`}
                   >
                     <Icon size={15} className="text-orange-500 shrink-0" />
                     {label}
+                    {isActive(href) && (
+                      <span className="ml-auto w-1.5 h-1.5 rounded-full bg-orange-500" />
+                    )}
                   </Link>
                 ))}
               </div>
@@ -127,72 +182,89 @@ const SimpleMenu = () => {
           </li>
 
           <li>
-            <button onClick={handleLogout} className="hover:text-orange-200 transition flex items-center gap-1.5">
-              <LogOut size={15} /> Logout
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-red-500/20 hover:text-red-100 transition-all ml-1"
+              title="Logout"
+            >
+              <LogOut size={14} /> Logout
             </button>
           </li>
         </ul>
 
-        {/* ── Mobile: session + hamburger ─────────────────── */}
-        <div className="md:hidden flex items-center gap-3">
-          <select
-            value={session}
-            onChange={handleSessionChange}
-            className="bg-orange-700 text-white text-xs font-semibold rounded px-2 py-1 outline-none border border-orange-500"
+        {/* ── Mobile: session + hamburger ──────────── */}
+        <div className="md:hidden flex items-center gap-2">
+          <div className="flex items-center gap-1 bg-orange-700 rounded-lg px-2 py-1 border border-orange-500">
+            <CalendarDays size={11} className="text-orange-200" />
+            <select
+              value={session}
+              onChange={handleSessionChange}
+              className="bg-transparent text-white text-xs font-semibold outline-none cursor-pointer"
+            >
+              <option value="2026-2027">2026-27</option>
+              <option value="2025-2026">2025-2026 (Old)</option>
+            </select>
+          </div>
+          <button
+            onClick={() => setMobileOpen((o) => !o)}
+            className="p-1.5 hover:bg-white/10 rounded-lg transition-colors focus:outline-none"
           >
-            <option value="2026-2027">2026-2027</option>
-            <option value="2025-2026">2025-2026</option>
-          </select>
-          <button onClick={() => setMobileOpen((o) => !o)} className="focus:outline-none">
-            {mobileOpen ? <X size={26} /> : <Menu size={26} />}
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
 
-      {/* ── Mobile drawer ────────────────────────────────── */}
+      {/* ── Mobile drawer ─────────────────────────── */}
       {mobileOpen && (
-        <div className="md:hidden mt-3 bg-orange-700 rounded-xl p-4 flex flex-col gap-1 animate-slideDown">
-
+        <div className="md:hidden bg-orange-700 border-t border-orange-500 px-4 pb-4 pt-2 flex flex-col gap-1 animate-slideDown">
           {/* Primary links */}
-          {[
-            { href: "/dashboard",     label: "Dashboard",      Icon: LayoutDashboard },
-            { href: "/searchStudent", label: "Search Students", Icon: Search },
-            { href: "/payBill",       label: "Pay Bill",        Icon: Receipt },
-          ].map(({ href, label, Icon }) => (
+          {PRIMARY_LINKS.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}
               onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-orange-600 transition font-medium text-sm"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-colors ${
+                isActive(href)
+                  ? "bg-white/25 text-white font-bold"
+                  : "hover:bg-orange-600"
+              }`}
             >
-              <Icon size={16} className="text-orange-200 shrink-0" /> {label}
+              <Icon size={16} className="text-orange-200 shrink-0" />
+              {label}
+              {isActive(href) && (
+                <span className="ml-auto text-[10px] bg-white/20 rounded px-1.5 py-0.5">Active</span>
+              )}
             </Link>
           ))}
 
-          {/* Divider */}
-          <div className="border-t border-orange-500 my-1" />
+          <div className="border-t border-orange-500/60 my-1.5" />
+          <p className="text-orange-300 text-[10px] font-bold uppercase tracking-wider px-3 mb-1">
+            More
+          </p>
 
-          {/* More section */}
-          <p className="text-orange-300 text-xs font-semibold uppercase tracking-wider px-3 mb-1">More</p>
           {MORE_LINKS.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}
               onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-orange-600 transition text-sm"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+                isActive(href)
+                  ? "bg-white/25 text-white font-semibold"
+                  : "hover:bg-orange-600"
+              }`}
             >
-              <Icon size={16} className="text-orange-300 shrink-0" /> {label}
+              <Icon size={16} className="text-orange-300 shrink-0" />
+              {label}
             </Link>
           ))}
 
-          {/* Divider */}
-          <div className="border-t border-orange-500 my-1" />
-
+          <div className="border-t border-orange-500/60 my-1.5" />
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-orange-600 transition text-sm font-medium w-full text-left"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-600/40 transition-colors text-sm font-medium w-full text-left"
           >
-            <LogOut size={16} className="text-orange-200 shrink-0" /> Logout
+            <LogOut size={16} className="text-orange-200 shrink-0" />
+            Logout
           </button>
         </div>
       )}
