@@ -36,7 +36,7 @@ export async function GET(request) {
       userName: "admin",
       attestationType: "none",
       excludeCredentials: userDevices.map(dev => ({
-        id: Buffer.from(dev.credentialID, 'base64url'), // Convert back to Buffer/Uint8Array
+        id: dev.credentialID,
         type: "public-key",
       })),
       authenticatorSelection: {
@@ -96,17 +96,16 @@ export async function POST(request) {
     const { verified, registrationInfo } = verification;
 
     if (verified && registrationInfo) {
-      const { credentialID, credentialPublicKey, counter, credentialDeviceType, credentialBackedUp } = registrationInfo;
+      const { credential, credentialDeviceType, credentialBackedUp } = registrationInfo;
       
       const newDevice = new AdminDevice({
         userId: "admin",
-        // SimpleWebAuthn v10 returns Uint8Arrays. Convert to base64url strings for DB storage
-        credentialID: Buffer.from(credentialID).toString('base64url'),
-        credentialPublicKey: Buffer.from(credentialPublicKey).toString('base64url'),
-        counter,
+        credentialID: credential.id, // v13 returns base64url string
+        credentialPublicKey: Buffer.from(credential.publicKey).toString('base64url'), // v13 returns Uint8Array
+        counter: credential.counter,
         deviceType: credentialDeviceType,
         backedUp: credentialBackedUp,
-        transports: body.response.transports || [],
+        transports: credential.transports || [],
       });
 
       await newDevice.save();

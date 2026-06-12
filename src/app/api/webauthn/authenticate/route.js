@@ -26,8 +26,9 @@ export async function GET(request) {
     const options = await generateAuthenticationOptions({
       rpID,
       allowCredentials: userDevices.map(dev => ({
-        id: Buffer.from(dev.credentialID, 'base64url'),
+        id: dev.credentialID, // v13 expects string
         type: "public-key",
+        transports: dev.transports,
       })),
       userVerification: "preferred",
     });
@@ -62,9 +63,11 @@ export async function POST(request) {
     const origin = request.headers.get("origin") || "http://localhost:3000";
     const rpID = getRPID(origin);
 
+    const userDevices = await AdminDevice.find({ userId: "admin" });
+
     // Find the device in DB
-    const device = await AdminDevice.findOne({ credentialID: body.id });
-    if (!device) {
+    const authenticator = userDevices.find(dev => dev.credentialID === body.id);
+    if (!authenticator) {
       return NextResponse.json({ error: "Authenticator is not registered" }, { status: 400 });
     }
 
@@ -75,10 +78,11 @@ export async function POST(request) {
         expectedChallenge,
         expectedOrigin: origin,
         expectedRPID: rpID,
-        authenticator: {
-          credentialID: Buffer.from(device.credentialID, 'base64url'),
-          credentialPublicKey: Buffer.from(device.credentialPublicKey, 'base64url'),
-          counter: device.counter,
+        credential: {
+          id: authenticator.credentialID,
+          publicKey: new Uint8Array(Buffer.from(authenticator.credentialPublicKey, 'base64url')),
+          counter: authenticator.counter,
+          transports: authenticator.transports,
         },
       });
     } catch (error) {
@@ -88,10 +92,9 @@ export async function POST(request) {
 
     const { verified, authenticationInfo } = verification;
 
-    if (verified) {
-      // Update the counter
-      device.counter = authenticationInfo.newCounter;
-      await device.save();
+    if (verified && authenticationInfo) {
+      authenticator.counter = authenticationInfo.newCounter;
+      await authenticator.save();
 
       const response = NextResponse.json({ verified: true });
       response.cookies.delete("webauthnChallenge");
