@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, GraduationCap, ArrowRight, Users } from "lucide-react";
+import { Eye, EyeOff, GraduationCap, ArrowRight, Users, ScanFace } from "lucide-react";
 
 export default function Home() {
   const [username, setUsername] = useState("");
@@ -30,6 +30,40 @@ export default function Home() {
     } catch (error) {
       console.error("Login error:", error);
       toast.error("Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleBiometricLogin = async () => {
+    setIsLoading(true);
+    try {
+      const { startAuthentication } = await import('@simplewebauthn/browser');
+      const resp = await fetch('/api/webauthn/authenticate');
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.error || "Failed to get auth options");
+      }
+      const options = await resp.json();
+      
+      const asseResp = await startAuthentication({ optionsJSON: options });
+      
+      const verifyResp = await fetch('/api/webauthn/authenticate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(asseResp)
+      });
+      
+      if (verifyResp.ok) {
+        toast.success("Biometric login successful! Redirecting...");
+        router.push("/searchStudent");
+      } else {
+        const err = await verifyResp.json();
+        throw new Error(err.error || "Failed to verify authentication");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || "Biometric login failed. (Are you enrolled?)");
     } finally {
       setIsLoading(false);
     }
@@ -128,6 +162,20 @@ export default function Home() {
                 Sign In <ArrowRight size={18} />
               </>
             )}
+          </button>
+
+          <div className="relative flex items-center py-4">
+            <div className="flex-grow border-t border-gray-200"></div>
+            <span className="flex-shrink-0 mx-4 text-gray-400 text-xs font-semibold uppercase tracking-wider">Or</span>
+            <div className="flex-grow border-t border-gray-200"></div>
+          </div>
+
+          <button
+            onClick={handleBiometricLogin}
+            disabled={isLoading}
+            className="w-full bg-indigo-50 text-indigo-600 py-3 rounded-xl font-semibold hover:bg-indigo-100 active:scale-95 transition-all flex items-center justify-center gap-2 border border-indigo-200"
+          >
+            <ScanFace size={18} /> Login with Face ID / Fingerprint
           </button>
 
           <p className="text-center text-xs text-gray-400 mt-4">

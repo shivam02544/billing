@@ -10,7 +10,7 @@ import {
   Lock, Unlock, GraduationCap, TrendingUp, AlertTriangle,
   Truck, Search, UserPlus, Receipt, FileText, RefreshCw,
   Phone, MessageCircle, X, ChevronRight, Megaphone,
-  Calculator, CreditCard, Bell, ExternalLink, IndianRupee,
+  Calculator, CreditCard, Bell, ExternalLink, IndianRupee, Fingerprint, ScanFace
 } from "lucide-react";
 import Link from "next/link";
 
@@ -223,6 +223,37 @@ const Dashboard = () => {
 
   const [revenueYear, setRevenueYear] = useState(new Date().getFullYear());
 
+  // Biometric Setup
+  const handleBiometricSetup = async () => {
+    try {
+      const { startRegistration } = await import('@simplewebauthn/browser');
+      const resp = await fetch('/api/webauthn/register');
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.error || "Failed to get registration options");
+      }
+      const options = await resp.json();
+      
+      const attResp = await startRegistration({ optionsJSON: options });
+      
+      const verifyResp = await fetch('/api/webauthn/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(attResp)
+      });
+      
+      if (verifyResp.ok) {
+        toast.success("Biometric login successfully registered! You can now use it to log in.");
+      } else {
+        const err = await verifyResp.json();
+        throw new Error(err.error || "Failed to verify registration");
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error(e.message || "Biometric setup failed");
+    }
+  };
+
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true);
@@ -322,12 +353,20 @@ const Dashboard = () => {
                 )}
               </p>
             </div>
-            <button
-              onClick={() => window.location.reload()}
-              className="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors border border-white/20 self-start sm:self-auto"
-            >
-              <RefreshCw size={14} /> Refresh
-            </button>
+            <div className="flex gap-2 self-start sm:self-auto flex-wrap">
+              <button
+                onClick={handleBiometricSetup}
+                className="flex items-center gap-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm border border-indigo-400"
+              >
+                <ScanFace size={14} /> Biometric Setup
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors border border-white/20"
+              >
+                <RefreshCw size={14} /> Refresh
+              </button>
+            </div>
           </div>
         </div>
 

@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@simplewebauthn/browser": "^13.3.0",
+    "@simplewebauthn/server": "^13.3.1",
     "chart.js": "^4.4.9",
     "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.7",
