@@ -18,7 +18,12 @@ const StudentSearch = () => {
   const [classFilter, setClassFilter]      = useState("All");
   const [villageFilter, setVillageFilter]  = useState("All");
   const [showFilters, setShowFilters]      = useState(false);
+  const [isLoggedIn, setIsLoggedIn]        = useState(false);
   const searchRef                          = useRef(null);
+
+  useEffect(() => {
+    setIsLoggedIn(document.cookie.includes('token='));
+  }, []);
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -278,27 +283,29 @@ const StudentSearch = () => {
                     </div>
 
                     {/* Action buttons */}
-                    <div className="flex gap-2 flex-wrap sm:flex-nowrap">
-                      <button
-                        onClick={() => { setPageId(student.pageId); setShowBill(true); }}
-                        className="flex items-center gap-1.5 px-3 py-2 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold rounded-xl transition-colors"
-                      >
-                        <Receipt size={13} /> Pay Bill
-                      </button>
-                      <button
-                        onClick={() => { setPageId(student.pageId); setStudentName(student.name); setShowDetail(true); }}
-                        className="flex items-center gap-1.5 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-xl transition-colors"
-                      >
-                        <BookOpen size={13} /> Details
-                      </button>
-                      <button
-                        onClick={() => { setPageId(student.pageId); setShowBill(true); setTimeout(() => window.print(), 800); }}
-                        className="flex items-center gap-1.5 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold rounded-xl transition-colors"
-                        title="Open & Print Bill"
-                      >
-                        <Printer size={13} /> Print
-                      </button>
-                    </div>
+                    {isLoggedIn && (
+                      <div className="flex gap-2 flex-wrap sm:flex-nowrap">
+                        <button
+                          onClick={() => { setPageId(student.pageId); setShowBill(true); }}
+                          className="flex items-center gap-1.5 px-3 py-2 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold rounded-xl transition-colors"
+                        >
+                          <Receipt size={13} /> Pay Bill
+                        </button>
+                        <button
+                          onClick={() => { setPageId(student.pageId); setStudentName(student.name); setShowDetail(true); }}
+                          className="flex items-center gap-1.5 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-xl transition-colors"
+                        >
+                          <BookOpen size={13} /> Details
+                        </button>
+                        <button
+                          onClick={() => { setPageId(student.pageId); setShowBill(true); setTimeout(() => window.print(), 800); }}
+                          className="flex items-center gap-1.5 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold rounded-xl transition-colors"
+                          title="Open & Print Bill"
+                        >
+                          <Printer size={13} /> Print
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </li>
               ))}

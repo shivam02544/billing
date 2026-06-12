@@ -28,6 +28,7 @@ const SimpleMenu = () => {
   const [moreOpen,   setMoreOpen]   = useState(false);
   const [session,    setSession]    = useState("2026-2027");
   const [scrolled,   setScrolled]   = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const pathname = usePathname();
   const navRef   = useRef(null);
@@ -40,6 +41,7 @@ const SimpleMenu = () => {
     setSession(active);
     localStorage.setItem("currentSession", active);
     document.cookie = `currentSession=${active}; path=/; max-age=${60 * 60 * 24 * 365}`;
+    setIsLoggedIn(document.cookie.includes("token="));
   }, []);
 
   /* Scroll detection for nav elevation */
@@ -121,7 +123,7 @@ const SimpleMenu = () => {
             </div>
           </li>
 
-          {PRIMARY_LINKS.map(({ href, label, icon: Icon }) => (
+          {(isLoggedIn ? PRIMARY_LINKS : PRIMARY_LINKS.filter(l => l.href === '/searchStudent')).map(({ href, label, icon: Icon }) => (
             <li key={href}>
               <Link
                 href={href}
@@ -141,54 +143,66 @@ const SimpleMenu = () => {
           ))}
 
           {/* More dropdown */}
-          <li ref={moreRef} className="relative">
-            <button
-              onClick={() => setMoreOpen((o) => !o)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-                moreOpen ? "bg-white/20" : "hover:bg-white/10"
-              } focus:outline-none`}
-            >
-              More
-              <ChevronDown
-                size={14}
-                className={`transition-transform duration-200 ${moreOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-            {moreOpen && (
-              <div className="absolute top-full right-0 mt-2 w-52 bg-white text-gray-700 rounded-xl shadow-xl border border-orange-100 overflow-hidden z-50 animate-slideDown">
-                <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-orange-400">
-                  More Options
+          {isLoggedIn && (
+            <li ref={moreRef} className="relative">
+              <button
+                onClick={() => setMoreOpen((o) => !o)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
+                  moreOpen ? "bg-white/20" : "hover:bg-white/10"
+                } focus:outline-none`}
+              >
+                More
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-200 ${moreOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              {moreOpen && (
+                <div className="absolute top-full right-0 mt-2 w-52 bg-white text-gray-700 rounded-xl shadow-xl border border-orange-100 overflow-hidden z-50 animate-slideDown">
+                  <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-orange-400">
+                    More Options
+                  </div>
+                  {MORE_LINKS.map(({ href, label, icon: Icon }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setMoreOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                        isActive(href)
+                          ? "bg-orange-50 text-orange-600 font-semibold"
+                          : "hover:bg-orange-50"
+                      }`}
+                    >
+                      <Icon size={15} className="text-orange-500 shrink-0" />
+                      {label}
+                      {isActive(href) && (
+                        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-orange-500" />
+                      )}
+                    </Link>
+                  ))}
                 </div>
-                {MORE_LINKS.map(({ href, label, icon: Icon }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    onClick={() => setMoreOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
-                      isActive(href)
-                        ? "bg-orange-50 text-orange-600 font-semibold"
-                        : "hover:bg-orange-50"
-                    }`}
-                  >
-                    <Icon size={15} className="text-orange-500 shrink-0" />
-                    {label}
-                    {isActive(href) && (
-                      <span className="ml-auto w-1.5 h-1.5 rounded-full bg-orange-500" />
-                    )}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </li>
+              )}
+            </li>
+          )}
 
           <li>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-red-500/20 hover:text-red-100 transition-all ml-1"
-              title="Logout"
-            >
-              <LogOut size={14} /> Logout
-            </button>
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-red-500/20 hover:text-red-100 transition-all ml-1"
+                title="Logout"
+              >
+                <LogOut size={14} /> Logout
+              </button>
+            ) : (
+              <Link
+                href="/"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-white/20 transition-all ml-1"
+                title="Login"
+              >
+                <LogOut size={14} className="rotate-180" /> Login
+              </Link>
+            )}
           </li>
         </ul>
 
@@ -218,7 +232,7 @@ const SimpleMenu = () => {
       {mobileOpen && (
         <div className="md:hidden bg-orange-700 border-t border-orange-500 px-4 pb-4 pt-2 flex flex-col gap-1 animate-slideDown">
           {/* Primary links */}
-          {PRIMARY_LINKS.map(({ href, label, icon: Icon }) => (
+          {(isLoggedIn ? PRIMARY_LINKS : PRIMARY_LINKS.filter(l => l.href === '/searchStudent')).map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}
@@ -237,35 +251,50 @@ const SimpleMenu = () => {
             </Link>
           ))}
 
-          <div className="border-t border-orange-500/60 my-1.5" />
-          <p className="text-orange-300 text-[10px] font-bold uppercase tracking-wider px-3 mb-1">
-            More
-          </p>
+          {isLoggedIn && (
+            <>
+              <div className="border-t border-orange-500/60 my-1.5" />
+              <p className="text-orange-300 text-[10px] font-bold uppercase tracking-wider px-3 mb-1">
+                More
+              </p>
 
-          {MORE_LINKS.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
-                isActive(href)
-                  ? "bg-white/25 text-white font-semibold"
-                  : "hover:bg-orange-600"
-              }`}
+              {MORE_LINKS.map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+                    isActive(href)
+                      ? "bg-white/25 text-white font-semibold"
+                      : "hover:bg-orange-600"
+                  }`}
+                >
+                  <Icon size={16} className="text-orange-300 shrink-0" />
+                  {label}
+                </Link>
+              ))}
+            </>
+          )}
+
+          <div className="border-t border-orange-500/60 my-1.5" />
+          {isLoggedIn ? (
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-600/40 transition-colors text-sm font-medium w-full text-left"
             >
-              <Icon size={16} className="text-orange-300 shrink-0" />
-              {label}
+              <LogOut size={16} className="text-orange-200 shrink-0" />
+              Logout
+            </button>
+          ) : (
+            <Link
+              href="/"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10 transition-colors text-sm font-medium w-full text-left"
+            >
+              <LogOut size={16} className="text-orange-200 shrink-0 rotate-180" />
+              Login
             </Link>
-          ))}
-
-          <div className="border-t border-orange-500/60 my-1.5" />
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-600/40 transition-colors text-sm font-medium w-full text-left"
-          >
-            <LogOut size={16} className="text-orange-200 shrink-0" />
-            Logout
-          </button>
+          )}
         </div>
       )}
     </nav>

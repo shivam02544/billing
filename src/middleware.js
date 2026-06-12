@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export function proxy(request) {
+export function middleware(request) {
   try {
     const path = request.nextUrl.pathname;
     const token = request.cookies.get("token")?.value || null;
@@ -8,8 +8,6 @@ export function proxy(request) {
     // Define which routes require authentication
     const protectedRoutes = [
       "/dashboard",
-      "/searchStudent",
-      "/studentList",
       "/addNewStudent",
       "/studentBills",
       "/getStudentsBill",
@@ -36,6 +34,11 @@ export function proxy(request) {
     // Check authentication for protected routes and API routes
     if (!token) {
       if (path.startsWith("/api/")) {
+        // Exclude specific public APIs if needed. For now, we block all API routes except GETs or if explicitly configured.
+        // If /api/studentsCrud is needed for public search, we should whitelist it.
+        if (path === "/api/studentsCrud" && request.method === "GET") {
+          return NextResponse.next();
+        }
         return NextResponse.json({ status: 401, message: "Unauthorized. Please log in." }, { status: 401 });
       }
       if (isProtectedRoute) {
