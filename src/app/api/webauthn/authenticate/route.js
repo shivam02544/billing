@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { generateAuthenticationOptions, verifyAuthenticationResponse } from "@simplewebauthn/server";
-import connectDB from "@/helper/connectDB";
-import AdminDevice from "@/models/adminDeviceModel";
+import { connectDb } from "@/helper/connectDB";
+import adminDeviceSchema from "@/models/adminDeviceModel";
 
 // We rely on the origin of the request to define RP ID
 function getRPID(origin) {
@@ -15,7 +15,9 @@ function getRPID(origin) {
 
 export async function GET(request) {
   try {
-    await connectDB();
+    const db = await connectDb();
+    const AdminDevice = db.models.AdminDevice || db.model("AdminDevice", adminDeviceSchema);
+
     const origin = request.headers.get("origin") || request.headers.get("referer") || "http://localhost:3000";
     const rpID = getRPID(origin);
 
@@ -48,7 +50,9 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    await connectDB();
+    const db = await connectDb();
+    const AdminDevice = db.models.AdminDevice || db.model("AdminDevice", adminDeviceSchema);
+
     const body = await request.json();
     const expectedChallenge = request.cookies.get("webauthnChallenge")?.value;
     if (!expectedChallenge) {

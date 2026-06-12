@@ -1,11 +1,10 @@
-import mongoose from "mongoose";
+import { Schema } from "mongoose";
 
-const adminDeviceSchema = new mongoose.Schema({
+const adminDeviceSchema = new Schema({
   userId: { 
     type: String, 
     default: "admin" 
   },
-  // We store the WebAuthn IDs as Base64URL strings for easy serialization
   credentialID: { 
     type: String, 
     required: true, 
@@ -31,6 +30,4 @@ const adminDeviceSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-const AdminDevice = mongoose.models.AdminDevice || mongoose.model("AdminDevice", adminDeviceSchema);
-
-export default AdminDevice;
+export default adminDeviceSchema;
