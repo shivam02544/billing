@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "chart.js": "^4.4.9",
+    "googleapis": "^173.0.0",
     "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.482.0",
