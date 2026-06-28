@@ -38,7 +38,7 @@ function getDriveClient() {
 }
 
 /* ── Get-or-create per-student subfolder ─────────────────────── */
-export async function getOrCreateStudentFolder(pageId, studentName) {
+export async function getOrCreateStudentFolder(pageId, studentName, sectionKey = "student") {
   const drive    = getDriveClient();
   const parentId = process.env.GOOGLE_DRIVE_PARENT_FOLDER_ID;
 
@@ -46,7 +46,9 @@ export async function getOrCreateStudentFolder(pageId, studentName) {
     throw new Error("GOOGLE_DRIVE_PARENT_FOLDER_ID is not set in .env.local");
   }
 
-  const folderName = `${pageId} - ${studentName}`.toUpperCase().trim();
+  // Admin files live in a separate subfolder prefixed with "ADMIN - "
+  const base       = `${pageId} - ${studentName}`.toUpperCase().trim();
+  const folderName = sectionKey === "admin" ? `ADMIN - ${base}` : base;
 
   const searchRes = await drive.files.list({
     q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and '${parentId}' in parents and trashed=false`,
@@ -71,11 +73,12 @@ export async function getOrCreateStudentFolder(pageId, studentName) {
 }
 
 /* ── List all files in a student's folder ────────────────────── */
-export async function listFilesInStudentFolder(pageId, studentName) {
+export async function listFilesInStudentFolder(pageId, studentName, sectionKey = "student") {
   const drive    = getDriveClient();
   const parentId = process.env.GOOGLE_DRIVE_PARENT_FOLDER_ID;
 
-  const folderName = `${pageId} - ${studentName}`.toUpperCase().trim();
+  const base       = `${pageId} - ${studentName}`.toUpperCase().trim();
+  const folderName = sectionKey === "admin" ? `ADMIN - ${base}` : base;
 
   const folderRes = await drive.files.list({
     q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and '${parentId}' in parents and trashed=false`,
@@ -158,3 +161,99 @@ export async function makeFilePublic(fileId) {
     // Non-fatal — preview may still work via direct Drive link
   }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Admin Uploads — a general folder for admin-only files
+   (not tied to any specific student)
+   Folder structure: PARENT / ADMIN-UPLOADS / <category>/
+   ───────────────────────────────────────────────────────────── */
+
+/** Get or create the root "ADMIN-UPLOADS" folder under the parent */
+export async function getOrCreateAdminUploadsFolder(category = "General") {
+  const drive    = getDriveClient();
+  const parentId = process.env.GOOGLE_DRIVE_PARENT_FOLDER_ID;
+
+  if (!parentId) throw new Error("GOOGLE_DRIVE_PARENT_FOLDER_ID is not set in .env.local");
+
+  // 1. Ensure the root admin folder exists
+  const rootName   = "ADMIN-UPLOADS";
+  const rootSearch = await drive.files.list({
+    q: `mimeType='application/vnd.google-apps.folder' and name='${rootName}' and '${parentId}' in parents and trashed=false`,
+    fields: "files(id)",
+    spaces: "drive",
+  });
+
+  let rootId;
+  if (rootSearch.data.files?.length > 0) {
+    rootId = rootSearch.data.files[0].id;
+  } else {
+    const r = await drive.files.create({
+      requestBody: { name: rootName, mimeType: "application/vnd.google-apps.folder", parents: [parentId] },
+      fields: "id",
+    });
+    rootId = r.data.id;
+  }
+
+  // 2. Ensure the category subfolder exists
+  const catName   = category.toUpperCase().trim() || "GENERAL";
+  const catSearch = await drive.files.list({
+    q: `mimeType='application/vnd.google-apps.folder' and name='${catName}' and '${rootId}' in parents and trashed=false`,
+    fields: "files(id)",
+    spaces: "drive",
+  });
+
+  if (catSearch.data.files?.length > 0) return catSearch.data.files[0].id;
+
+  const c = await drive.files.create({
+    requestBody: { name: catName, mimeType: "application/vnd.google-apps.folder", parents: [rootId] },
+    fields: "id",
+  });
+  return c.data.id;
+}
+
+/** List files from an admin category folder */
+export async function listAdminFiles(category = "General") {
+  const drive    = getDriveClient();
+  const parentId = process.env.GOOGLE_DRIVE_PARENT_FOLDER_ID;
+
+  const rootName = "ADMIN-UPLOADS";
+  const catName  = category.toUpperCase().trim() || "GENERAL";
+
+  // Find root
+  const rootSearch = await drive.files.list({
+    q: `mimeType='application/vnd.google-apps.folder' and name='${rootName}' and '${parentId}' in parents and trashed=false`,
+    fields: "files(id)",
+    spaces: "drive",
+  });
+  if (!rootSearch.data.files?.length) return [];
+
+  const rootId = rootSearch.data.files[0].id;
+
+  // Find category
+  const catSearch = await drive.files.list({
+    q: `mimeType='application/vnd.google-apps.folder' and name='${catName}' and '${rootId}' in parents and trashed=false`,
+    fields: "files(id)",
+    spaces: "drive",
+  });
+  if (!catSearch.data.files?.length) return [];
+
+  const catId   = catSearch.data.files[0].id;
+  const filesRes = await drive.files.list({
+    q: `'${catId}' in parents and trashed=false`,
+    fields: "files(id, name, mimeType, size, createdTime, webViewLink, webContentLink)",
+    orderBy: "createdTime desc",
+    spaces: "drive",
+  });
+
+  return (filesRes.data.files || []).map((f) => ({
+    id: f.id,
+    name: f.name,
+    mimeType: f.mimeType,
+    size: f.size ? Number(f.size) : 0,
+    createdTime: f.createdTime,
+    viewUrl: f.webViewLink,
+    downloadUrl: f.webContentLink,
+    previewUrl: `https://drive.google.com/file/d/${f.id}/preview`,
+  }));
+}
+

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Edit2, Save, Trash2, X, User, IndianRupee } from "lucide-react";
 import StudentFilesSection from "./StudentFilesSection";
+import { ShieldCheck, FolderOpen } from "lucide-react";
 
 const CLASSES = ["PRE-NC", "NC", "LKG", "UKG", "1", "2", "3", "4", "5", "6", "7", "8"];
 
@@ -313,8 +314,25 @@ const StudentDetailPage = ({ pageId, studentName }) => {
                 </div>
               </div>
 
-              {/* Section: Student Documents (Google Drive) */}
-              <StudentFilesSection pageId={sPageId} studentName={name} />
+              {/* Section: Student Documents */}
+              <StudentFilesSection
+                pageId={sPageId}
+                studentName={name}
+                sectionKey="student"
+                label="Student Documents"
+                accentColor="orange"
+                HeaderIcon={FolderOpen}
+              />
+
+              {/* Section: Admin Documents */}
+              <StudentFilesSection
+                pageId={sPageId}
+                studentName={name}
+                sectionKey="admin"
+                label="Admin Documents"
+                accentColor="blue"
+                HeaderIcon={ShieldCheck}
+              />
             </>
           )}
         </div>

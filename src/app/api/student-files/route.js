@@ -9,12 +9,13 @@ import {
 
 export const dynamic = "force-dynamic";
 
-/* ── GET /api/student-files?pageId=XXX&studentName=YYY ────────── */
+/* ── GET /api/student-files?pageId=XXX&studentName=YYY&sectionKey=student|admin */
 export const GET = async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const pageId      = searchParams.get("pageId");
     const studentName = searchParams.get("studentName");
+    const sectionKey  = searchParams.get("sectionKey") || "student";
 
     if (!pageId || !studentName) {
       return NextResponse.json(
@@ -23,7 +24,7 @@ export const GET = async (request) => {
       );
     }
 
-    const files = await listFilesInStudentFolder(pageId, studentName);
+    const files = await listFilesInStudentFolder(pageId, studentName, sectionKey);
     return NextResponse.json({ statusCode: 200, data: files });
   } catch (error) {
     console.error("[student-files GET]", error.message);
@@ -34,12 +35,14 @@ export const GET = async (request) => {
   }
 };
 
-/* ── POST /api/student-files  (multipart/form-data) ───────────── */
+/* ── POST /api/student-files  (multipart/form-data)
+   Fields: pageId, studentName, sectionKey, file ────────────────── */
 export const POST = async (request) => {
   try {
     const formData    = await request.formData();
     const pageId      = formData.get("pageId");
     const studentName = formData.get("studentName");
+    const sectionKey  = formData.get("sectionKey") || "student";
     const file        = formData.get("file");
 
     if (!pageId || !studentName || !file) {
@@ -50,7 +53,7 @@ export const POST = async (request) => {
     }
 
     const buffer   = Buffer.from(await file.arrayBuffer());
-    const folderId = await getOrCreateStudentFolder(pageId, studentName);
+    const folderId = await getOrCreateStudentFolder(pageId, studentName, sectionKey);
     const uploaded = await uploadFileToDrive(folderId, buffer, file.name, file.type || "application/octet-stream");
 
     await makeFilePublic(uploaded.id);
@@ -65,7 +68,7 @@ export const POST = async (request) => {
   }
 };
 
-/* ── DELETE /api/student-files?fileId=XXX ─────────────────────── */
+/* ── DELETE /api/student-files?fileId=XXX ──────────────────────── */
 export const DELETE = async (request) => {
   try {
     const { searchParams } = new URL(request.url);

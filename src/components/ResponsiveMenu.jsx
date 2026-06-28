@@ -3,19 +3,21 @@
 import { useState, useEffect, useRef } from "react";
 import {
   Menu, X, ChevronDown, UserPlus, FileText, Receipt,
-  CreditCard, LayoutDashboard, Search, LogOut, Calculator, CalendarDays
+  CreditCard, LayoutDashboard, Search, LogOut, Calculator, CalendarDays, CloudUpload
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
 
 const MORE_LINKS = [
-  { href: "/addNewStudent",   label: "Add New Student",  icon: UserPlus   },
-  { href: "/generateBill",   label: "Generate Bills",   icon: Receipt    },
-  { href: "/About",          label: "Fee Structure",    icon: FileText   },
-  { href: "/icard-fee",      label: "iCard Fee",        icon: CreditCard },
-  { href: "/age-calculator", label: "Age Calculator",   icon: Calculator },
+  { href: "/addNewStudent",   label: "Add New Student",  icon: UserPlus     },
+  { href: "/generateBill",    label: "Generate Bills",   icon: Receipt      },
+  { href: "/About",           label: "Fee Structure",    icon: FileText     },
+  { href: "/icard-fee",       label: "iCard Fee",        icon: CreditCard   },
+  { href: "/age-calculator",  label: "Age Calculator",   icon: Calculator   },
+  { href: "/adminUploads",    label: "Admin Uploads",    icon: CloudUpload  },
 ];
+
 
 const PRIMARY_LINKS = [
   { href: "/dashboard",     label: "Dashboard",  icon: LayoutDashboard },
