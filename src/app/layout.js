@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import StickyMenu from "@/components/StickyMenu";
+import ThemeInjector from "@/components/ThemeInjector";
 
 export const metadata = {
   title: "NPPS — New Progressive Public School",
@@ -19,6 +20,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="antialiased">
+        <ThemeInjector />
         <StickyMenu />
         {children}
         <Toaster

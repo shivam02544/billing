@@ -6,6 +6,7 @@ import {
   Menu, X, Settings, ArrowUpRight, FileText, Bell,
   CreditCard, Calculator, LayoutDashboard, Zap
 } from "lucide-react";
+import { useAppSettings } from "@/hooks/useAppSettings";
 
 const MENU_ITEMS = [
   { path: "/dashboard",       label: "Dashboard",      icon: LayoutDashboard, color: "text-blue-500"   },
@@ -14,15 +15,16 @@ const MENU_ITEMS = [
   { path: "/icard-fee",       label: "iCard Fee",      icon: CreditCard,      color: "text-orange-500" },
   { path: "/export-data",     label: "Database Tools", icon: FileText,        color: "text-gray-500"   },
   { path: "/age-calculator",  label: "Age Calculator", icon: Calculator,      color: "text-indigo-500" },
-  { path: "#",                label: "Tools & Macros", icon: Settings,        color: "text-gray-500"   },
+  { path: "/admin-settings",  label: "App Settings",   icon: Settings,        color: "text-purple-500" },
 ];
 
 const HIDDEN_PATHS = ["/studentBills", "/getStudentsBill", "/", "/icard-fee"];
 
 export default function StickyMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const menuRef  = useRef(null);
   const pathname = usePathname();
+  const menuRef = useRef(null);
+  const { settings } = useAppSettings();
   const router   = useRouter();
 
   useEffect(() => {
@@ -40,6 +42,9 @@ export default function StickyMenu() {
     window.open(path, "_blank", "noopener,noreferrer");
     setIsOpen(false);
   };
+
+  // Only render if the admin setting says "floating" (StickyMenu)
+  if (settings.sidebarStyle !== "floating") return null;
 
   if (HIDDEN_PATHS.includes(pathname)) return null;
 

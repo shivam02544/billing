@@ -13,6 +13,7 @@ import {
   Calculator, CreditCard, Bell, ExternalLink, IndianRupee,
 } from "lucide-react";
 import Link from "next/link";
+import { useAppSettings } from "@/hooks/useAppSettings";
 
 const COLORS = ["#34D399", "#F87171"];
 
@@ -210,9 +211,11 @@ const Dashboard = () => {
   const [isRevenueUnlocked, setIsRevenueUnlocked] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
 
+  const { settings } = useAppSettings();
+
   const handleUnlock = (e) => {
     e.preventDefault();
-    if (passwordInput === "ranjuMa'am") {
+    if (passwordInput === process.env.NEXT_PUBLIC_ADMIN_TOKEN || passwordInput === "ranjuMa'am") {
       setIsRevenueUnlocked(true);
       toast.success("Revenue insights unlocked!");
     } else {
@@ -256,6 +259,15 @@ const Dashboard = () => {
     fetchAll();
     setCurrentSession(localStorage.getItem("currentSession") || "2026-2027");
   }, []);
+
+  // Use the setting for auto-refresh
+  useEffect(() => {
+    if (!settings.autoRefreshDashboard || !settings.autoRefreshInterval) return;
+    const interval = setInterval(() => {
+      window.location.reload();
+    }, settings.autoRefreshInterval * 1000);
+    return () => clearInterval(interval);
+  }, [settings.autoRefreshDashboard, settings.autoRefreshInterval]);
 
   useEffect(() => {
     // Fetch monthly revenue with selected year
@@ -383,10 +395,10 @@ const Dashboard = () => {
           {/* ── Quick Actions — Secondary ─────────── */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { href: "/announcement",    label: "Announcement",   icon: Megaphone,   color: "text-orange-500", bg: "bg-orange-50",  border: "border-orange-200" },
-              { href: "/age-calculator",  label: "Age Calculator",  icon: Calculator,  color: "text-indigo-500", bg: "bg-indigo-50",  border: "border-indigo-200" },
+              ...(settings.enableAnnouncements ? [{ href: "/announcement",    label: "Announcement",   icon: Megaphone,   color: "text-orange-500", bg: "bg-orange-50",  border: "border-orange-200" }] : []),
+              ...(settings.enableAgeCalculator ? [{ href: "/age-calculator",  label: "Age Calculator",  icon: Calculator,  color: "text-indigo-500", bg: "bg-indigo-50",  border: "border-indigo-200" }] : []),
               { href: "/important-fees",  label: "Fee Structure",   icon: IndianRupee, color: "text-green-600",  bg: "bg-green-50",   border: "border-green-200"  },
-              { href: "/export-data",     label: "Export Data",     icon: ExternalLink,color: "text-gray-500",   bg: "bg-gray-50",    border: "border-gray-200"   },
+              ...(settings.enableExportData ? [{ href: "/export-data",     label: "Export Data",     icon: ExternalLink,color: "text-gray-500",   bg: "bg-gray-50",    border: "border-gray-200"   }] : []),
             ].map(({ href, label, icon: Icon, color, bg, border }) => (
               <Link
                 key={href}
@@ -410,7 +422,7 @@ const Dashboard = () => {
               valueClass="text-orange-600"
               loading={loading}
             />
-            {isRevenueUnlocked ? (
+            {(!settings.requirePasswordForRevenue || isRevenueUnlocked) ? (
               <>
                 <StatCard
                   label="Total Collected"
@@ -460,8 +472,8 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* ── Defaulters Alert (always visible) ── */}
-          {!loading && defaultersData.length > 0 && (
+          {/* ── Defaulters Alert ── */}
+          {settings.enableDefaultersAlert && !loading && defaultersData.length > 0 && (
             <div className="bg-red-50 border border-red-200 rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-slideUp">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
@@ -499,7 +511,7 @@ const Dashboard = () => {
               </ResponsiveContainer>
             </div>
 
-            {isRevenueUnlocked ? (
+            {(!settings.requirePasswordForRevenue || isRevenueUnlocked) ? (
               <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                 <h2 className="text-base font-bold text-gray-700 mb-4">Paid vs Due</h2>
                 <ResponsiveContainer width="100%" height={260}>
@@ -522,7 +534,7 @@ const Dashboard = () => {
           </div>
 
           {/* ── Revenue & Defaulters ─────────────── */}
-          {isRevenueUnlocked && (
+          {(!settings.requirePasswordForRevenue || isRevenueUnlocked) && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
               <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
                 <div className="flex flex-col sm:flex-row justify-between items-center mb-4">

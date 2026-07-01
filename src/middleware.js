@@ -16,7 +16,8 @@ export function middleware(request) {
       "/payBill",
       "/important-fees",
       "/announcement",
-      "/About"
+      "/About",
+      "/admin-settings"
     ];
 
     const isProtectedRoute = protectedRoutes.some(
@@ -34,9 +35,11 @@ export function middleware(request) {
     // Check authentication for protected routes and API routes
     if (!token) {
       if (path.startsWith("/api/")) {
-        // Exclude specific public APIs if needed. For now, we block all API routes except GETs or if explicitly configured.
-        // If /api/studentsCrud is needed for public search, we should whitelist it.
+        // Allow public API endpoints
         if (path === "/api/studentsCrud" && request.method === "GET") {
+          return NextResponse.next();
+        }
+        if (path === "/api/app-settings") {
           return NextResponse.next();
         }
         return NextResponse.json({ status: 401, message: "Unauthorized. Please log in." }, { status: 401 });

@@ -3,19 +3,21 @@
 import { useState, useEffect, useRef } from "react";
 import {
   Menu, X, ChevronDown, UserPlus, FileText, Receipt,
-  CreditCard, LayoutDashboard, Search, LogOut, Calculator, CalendarDays, CloudUpload
+  CreditCard, LayoutDashboard, Search, LogOut, Calculator, CalendarDays, CloudUpload, Settings
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAppSettings } from "@/hooks/useAppSettings";
 import toast from "react-hot-toast";
 
 const MORE_LINKS = [
-  { href: "/addNewStudent",   label: "Add New Student",  icon: UserPlus     },
-  { href: "/generateBill",    label: "Generate Bills",   icon: Receipt      },
-  { href: "/About",           label: "Fee Structure",    icon: FileText     },
-  { href: "/icard-fee",       label: "iCard Fee",        icon: CreditCard   },
-  { href: "/age-calculator",  label: "Age Calculator",   icon: Calculator   },
-  { href: "/adminUploads",    label: "Admin Uploads",    icon: CloudUpload  },
+  { href: "/addNewStudent",      label: "Add New Student",  icon: UserPlus     },
+  { href: "/generateBill",       label: "Generate Bills",   icon: Receipt      },
+  { href: "/About",              label: "Fee Structure",    icon: FileText     },
+  { href: "/icard-fee",          label: "iCard Fee",        icon: CreditCard   },
+  { href: "/age-calculator",     label: "Age Calculator",   icon: Calculator   },
+  { href: "/adminUploads",       label: "Admin Uploads",    icon: CloudUpload  },
+  { href: "/admin-settings",     label: "App Settings",     icon: Settings     },
 ];
 
 
@@ -35,6 +37,7 @@ const SimpleMenu = () => {
   const pathname = usePathname();
   const navRef   = useRef(null);
   const moreRef  = useRef(null);
+  const { settings } = useAppSettings();
 
   /* Read stored session on mount */
   useEffect(() => {

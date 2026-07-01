@@ -8,10 +8,12 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import EditBill from "./EditBill";
 import UpiQrCode from "./UpiQrCode";
+import CustomBill from "./CustomBill";
 import {
   Edit2, RefreshCw, Download, MessageSquare, CreditCard,
   CheckCircle2, X, AlertTriangle, IndianRupee, Wallet
 } from "lucide-react";
+import { useAppSettings } from "@/hooks/useAppSettings";
 
 // Fetcher for SWR
 const fetcher = (url) =>
@@ -83,6 +85,8 @@ const Bill = ({ pageId }) => {
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [isSmsSending, setIsSmsSending] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  const { settings } = useAppSettings();
 
   const { data, error, isLoading, mutate } = useSWR(
     pageId ? `/api/billPayment?pageId=${pageId}` : null,
@@ -246,9 +250,9 @@ const Bill = ({ pageId }) => {
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
     doc.text(`Grand Total (Due): ₹${Number(studentBillDetail.totalDue || 0)}`, 14, finalY + 26);
-    const upiId = process.env.NEXT_PUBLIC_SCHOOL_UPI_ID;
-    const schoolName = process.env.NEXT_PUBLIC_SCHOOL_NAME || "SCHOOL";
-    if (upiId && Number(studentBillDetail.totalDue || 0) > 0) {
+    const upiId = settings.schoolUpiId || process.env.NEXT_PUBLIC_SCHOOL_UPI_ID;
+    const schoolName = settings.schoolName || process.env.NEXT_PUBLIC_SCHOOL_NAME || "SCHOOL";
+    if (settings.pdfIncludeQr && upiId && Number(studentBillDetail.totalDue || 0) > 0) {
       try {
         const QRCode = await import("qrcode");
         const encodedName = encodeURIComponent(schoolName);
@@ -285,7 +289,12 @@ const Bill = ({ pageId }) => {
       <div className="min-h-screen bg-orange-50">
 
         {/* ── Header strip ──────────────────────────── */}
-        <div className="bg-gradient-to-r from-orange-600 to-orange-500 text-white px-5 py-4">
+        <div 
+          className="text-white px-5 py-4"
+          style={{ 
+            background: `linear-gradient(to right, ${settings.billHeaderColor || '#ea580c'}, ${settings.billAccentColor || '#fb923c'})` 
+          }}
+        >
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div>
               <p className="text-xs text-orange-200 uppercase tracking-widest font-semibold">Bill Payment</p>
@@ -319,83 +328,110 @@ const Bill = ({ pageId }) => {
             >
               <RefreshCw size={14} /> Regenerate
             </button>
-            <button
-              onClick={handleDownloadPDF}
-              className="flex items-center gap-1.5 px-4 py-2 bg-white border border-gray-200 hover:border-red-400 hover:bg-red-50 text-gray-700 hover:text-red-600 text-sm font-semibold rounded-xl transition-all shadow-sm"
-            >
-              <Download size={14} /> Download PDF
-            </button>
-            <button
-              onClick={handleSendSMS}
-              disabled={isSmsSending}
-              className="flex items-center gap-1.5 px-4 py-2 bg-white border border-gray-200 hover:border-amber-400 hover:bg-amber-50 text-gray-700 hover:text-amber-700 text-sm font-semibold rounded-xl transition-all shadow-sm disabled:opacity-50"
-            >
-              {isSmsSending ? (
-                <span className="w-3 h-3 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-              ) : <MessageSquare size={14} />}
-              SMS (Hindi)
-            </button>
+            {settings.enablePDFDownload && (
+              <button
+                onClick={handleDownloadPDF}
+                className="flex items-center gap-1.5 px-4 py-2 bg-white border border-gray-200 hover:border-red-400 hover:bg-red-50 text-gray-700 hover:text-red-600 text-sm font-semibold rounded-xl transition-all shadow-sm"
+              >
+                <Download size={14} /> Download PDF
+              </button>
+            )}
+            {settings.enableSMS && (
+              <button
+                onClick={handleSendSMS}
+                disabled={isSmsSending}
+                className="flex items-center gap-1.5 px-4 py-2 bg-white border border-gray-200 hover:border-amber-400 hover:bg-amber-50 text-gray-700 hover:text-amber-700 text-sm font-semibold rounded-xl transition-all shadow-sm disabled:opacity-50"
+              >
+                {isSmsSending ? (
+                  <span className="w-3 h-3 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                ) : <MessageSquare size={14} />}
+                SMS (Hindi)
+              </button>
+            )}
           </div>
 
-          {/* ── Students & Fee Table ────────────────── */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-5 py-3 bg-orange-50 border-b border-orange-100">
-              <h3 className="text-sm font-bold text-orange-700 uppercase tracking-wide">Fee Breakdown</h3>
+          {/* ── Students & Fee Table / Custom Bill Layout ────────────────── */}
+          {settings.customBillLayout ? (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col items-center overflow-auto">
+              <p className="text-xs font-bold text-orange-600 uppercase tracking-widest mb-4">Receipt Preview</p>
+              <CustomBill 
+                bill={studentBillDetail}
+                students={students}
+                settings={settings}
+              />
             </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead>
-                  <tr className="bg-orange-50 text-orange-700">
-                    <th className="px-4 py-2.5 text-left text-xs font-bold uppercase tracking-wide">Student</th>
-                    <th className="px-4 py-2.5 text-left text-xs font-bold uppercase tracking-wide">Class</th>
-                    <th className="px-4 py-2.5 text-right text-xs font-bold uppercase tracking-wide">Tuition</th>
-                    <th className="px-4 py-2.5 text-right text-xs font-bold uppercase tracking-wide">Transport</th>
-                    <th className="px-4 py-2.5 text-right text-xs font-bold uppercase tracking-wide">Exam</th>
-                    <th className="px-4 py-2.5 text-right text-xs font-bold uppercase tracking-wide">Extra</th>
-                    <th className="px-4 py-2.5 text-right text-xs font-bold uppercase tracking-wide">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map((student, index) => {
-                    const totalForStudent =
-                      Number(student.tuitionFee || 0) + Number(student.examFee || 0) +
-                      Number(student.transportFee || 0) + Number(student.extraClassesFee || 0);
-                    return (
-                      <tr key={index} className="border-t border-gray-50 hover:bg-orange-50 transition-colors">
-                        <td className="px-4 py-3 font-semibold text-gray-800">{student.name}</td>
-                        <td className="px-4 py-3 text-gray-500">{student.className}</td>
-                        <td className="px-4 py-3 text-right text-gray-700">₹{Number(student.tuitionFee || 0)}</td>
-                        <td className="px-4 py-3 text-right text-gray-700">₹{Number(student.transportFee || 0)}</td>
-                        <td className="px-4 py-3 text-right text-gray-700">₹{Number(student.examFee || 0)}</td>
-                        <td className="px-4 py-3 text-right text-gray-700">₹{Number(student.extraClassesFee || 0)}</td>
-                        <td className="px-4 py-3 text-right font-bold text-orange-700">₹{totalForStudent}</td>
+          ) : (
+            <>
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="px-5 py-3 bg-orange-50 border-b border-orange-100">
+                  <h3 className="text-sm font-bold text-orange-700 uppercase tracking-wide">Fee Breakdown</h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="bg-orange-50 text-orange-700">
+                        <th className="px-4 py-2.5 text-left text-xs font-bold uppercase tracking-wide">Student</th>
+                        <th className="px-4 py-2.5 text-left text-xs font-bold uppercase tracking-wide">Class</th>
+                        <th className="px-4 py-2.5 text-right text-xs font-bold uppercase tracking-wide">Tuition</th>
+                        <th className="px-4 py-2.5 text-right text-xs font-bold uppercase tracking-wide">Transport</th>
+                        <th className="px-4 py-2.5 text-right text-xs font-bold uppercase tracking-wide">Exam</th>
+                        <th className="px-4 py-2.5 text-right text-xs font-bold uppercase tracking-wide">Extra</th>
+                        <th className="px-4 py-2.5 text-right text-xs font-bold uppercase tracking-wide">Total</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                    </thead>
+                    <tbody>
+                      {students.map((student, index) => {
+                        const totalForStudent =
+                          Number(student.tuitionFee || 0) + Number(student.examFee || 0) +
+                          Number(student.transportFee || 0) + Number(student.extraClassesFee || 0);
+                        return (
+                          <tr key={index} className="border-t border-gray-50 hover:bg-orange-50 transition-colors">
+                            <td className="px-4 py-3 font-semibold text-gray-800">{student.name}</td>
+                            <td className="px-4 py-3 text-gray-500">{student.className}</td>
+                            <td className="px-4 py-3 text-right text-gray-700">₹{Number(student.tuitionFee || 0)}</td>
+                            <td className="px-4 py-3 text-right text-gray-700">₹{Number(student.transportFee || 0)}</td>
+                            <td className="px-4 py-3 text-right text-gray-700">₹{Number(student.examFee || 0)}</td>
+                            <td className="px-4 py-3 text-right text-gray-700">₹{Number(student.extraClassesFee || 0)}</td>
+                            <td className="px-4 py-3 text-right font-bold text-orange-700">₹{totalForStudent}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
 
-            {/* Summary rows */}
-            <div className="px-4 py-3 border-t border-gray-100 space-y-1">
-              <FeeRow label="Previous Dues" value={studentBillDetail.lastMonthDue} />
-              <FeeRow label={studentBillDetail.otherFeeMessage || "Other Fee"} value={studentBillDetail.otherFee} />
-              <FeeRow label="Paid Amount" value={-(studentBillDetail.paidAmount)} />
-            </div>
+                {/* Summary rows */}
+                <div className="px-4 py-3 border-t border-gray-100 space-y-1 relative overflow-hidden">
+                  {settings.billWatermark && (
+                    <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none rotate-[-15deg] select-none text-6xl font-black whitespace-nowrap">
+                      {settings.billWatermarkText}
+                    </div>
+                  )}
+                  <FeeRow label="Previous Dues" value={studentBillDetail.lastMonthDue} />
+                  <FeeRow label={studentBillDetail.otherFeeMessage || "Other Fee"} value={studentBillDetail.otherFee} />
+                  <FeeRow label="Paid Amount" value={-(studentBillDetail.paidAmount)} />
+                </div>
 
-            {/* Grand total */}
-            <div className="px-4 py-4 bg-orange-600 rounded-b-2xl flex items-center justify-between">
-              <span className="text-white font-bold">Grand Total Due</span>
-              <span className="text-2xl font-extrabold text-white">
-                ₹{Number(studentBillDetail.totalDue || 0).toLocaleString()}
-              </span>
-            </div>
-          </div>
+                {/* Grand total */}
+                <div 
+                  className="px-4 py-4 rounded-b-2xl flex items-center justify-between"
+                  style={{ backgroundColor: settings.billHeaderColor || '#ea580c' }}
+                >
+                  <span className="text-white font-bold">Grand Total Due</span>
+                  <span className={`text-2xl text-white ${settings.showDueAmountBold ? 'font-extrabold' : 'font-semibold'}`}>
+                    ₹{Number(studentBillDetail.totalDue || 0).toLocaleString()}
+                  </span>
+                </div>
+              </div>
 
-          {/* ── UPI QR Code ─────────────────────────── */}
-          <div className="flex justify-end">
-            <UpiQrCode amount={studentBillDetail.totalDue} billReference={studentBillDetail.pageId} size={110} />
-          </div>
+              {/* ── UPI QR Code ─────────────────────────── */}
+              {settings.enableUpiQr && settings.showQrInBill && (
+                <div className="flex justify-end">
+                  <UpiQrCode amount={studentBillDetail.totalDue} billReference={studentBillDetail.pageId} size={110} />
+                </div>
+              )}
+            </>
+          )}
 
           {/* ── Payment form ─────────────────────────── */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -454,8 +490,16 @@ const Bill = ({ pageId }) => {
         </div>
 
         {/* Payment history */}
-        <PaymentHistory paymentHistory={studentBillDetail.billPaymentHistory || []} />
+        {settings.showPaymentHistory && (
+          <PaymentHistory paymentHistory={studentBillDetail.billPaymentHistory || []} />
+        )}
       </div>
+      
+      {settings.billFooterText && (
+        <div className="text-center pb-8 px-4 text-xs text-gray-400 max-w-lg mx-auto">
+          {settings.billFooterText}
+        </div>
+      )}
     </>
   );
 };
